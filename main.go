@@ -6,6 +6,7 @@ import (
 	"order-and-pay/env"
 	repoimpl "order-and-pay/repo-impl"
 	"order-and-pay/service"
+	"order-and-pay/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -14,16 +15,19 @@ import (
 
 func main() {
 
+	utils.InitLogger()
+	utils.Logger.Sync()
+
 	err := godotenv.Load(".env")
 
 	if err != nil {
-		panic(err)
+		utils.Logger.Panic(err.Error())
 	}
 
 	dsn := env.GetDbDsn()
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
-		panic(err)
+		utils.Logger.Panic(err.Error())
 	}
 	defer db.Close()
 

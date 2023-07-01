@@ -1,0 +1,1 @@
+DELETE FROM statuses WHERE name IN('CREATED','COMPLETED');

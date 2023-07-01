@@ -24,8 +24,8 @@ func (os *OrderService) GetAll(from time.Time, to time.Time) []model.Order {
 	return os.repo.GetAll(from, to)
 }
 
-func (os *OrderService) Get(orderId string) model.Order {
-	return *os.repo.GetById(orderId)
+func (os *OrderService) Get(orderId string) *model.Order {
+	return os.repo.GetById(orderId)
 }
 
 func (os *OrderService) AddProduct(p *model.ProductInOrder) {

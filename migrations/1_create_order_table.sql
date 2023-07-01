@@ -1,1 +1,0 @@
-CREATE TABLE orders (id bigserial PRIMARY KEY, date DATE, payment_total DOUBLE PRECISION, payment_total DOUBLE PRECISION, status BIGINT);

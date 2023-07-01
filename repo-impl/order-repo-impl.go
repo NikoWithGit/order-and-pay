@@ -3,6 +3,7 @@ package repoimpl
 import (
 	"database/sql"
 	"order-and-pay/model"
+	"order-and-pay/utils"
 	"time"
 )
 
@@ -17,7 +18,7 @@ func NewOrderRepoImpl(db *sql.DB) *OrderRepoImpl {
 func (ori *OrderRepoImpl) GetPaymentsSumByOrderId(orderId string) float32 {
 	payRes, err := ori.db.Query("SELECT SUM(total)-SUM(change) FROM payments WHERE order_id=$1", orderId)
 	if err != nil {
-		panic(err)
+		utils.Logger.Panic(err.Error())
 	}
 	defer payRes.Close()
 	var paymentSum float32
@@ -30,7 +31,7 @@ func (ori *OrderRepoImpl) GetPaymentsSumByOrderId(orderId string) float32 {
 func (ori *OrderRepoImpl) GetProductsPriceSumByOrderId(orderId string) float32 {
 	prodPriceSumRes, err := ori.db.Query("SELECT SUM(num*price_per_one) FROM products_in_orders WHERE order_id=$1", orderId)
 	if err != nil {
-		panic(err)
+		utils.Logger.Panic(err.Error())
 	}
 	defer prodPriceSumRes.Close()
 	var priceSum float32
@@ -41,9 +42,9 @@ func (ori *OrderRepoImpl) GetProductsPriceSumByOrderId(orderId string) float32 {
 }
 
 func (ori *OrderRepoImpl) UpdateOrderStatusToComplete(orderId string) {
-	_, updErr := ori.db.Query("UPDATE orders SET status_id=1 WHERE id=$1", orderId)
-	if updErr != nil {
-		panic(updErr)
+	_, err := ori.db.Query("UPDATE orders SET status_id=1 WHERE id=$1", orderId)
+	if err != nil {
+		utils.Logger.Panic(err.Error())
 	}
 }
 
@@ -52,7 +53,7 @@ func (ori *OrderRepoImpl) GetProductsByOrderId(orderId string) []model.ProductIn
 		"SELECT uuid, num, price_per_one FROM products_in_orders p WHERE order_id = $1", orderId,
 	)
 	if err != nil {
-		panic(err)
+		utils.Logger.Panic(err.Error())
 	}
 	defer prods.Close()
 
@@ -72,7 +73,7 @@ func (ori *OrderRepoImpl) GetPaymentsByOrderId(orderId string) []model.Payment {
 		"SELECT total, change FROM payments p WHERE order_id = $1", orderId,
 	)
 	if err != nil {
-		panic(err)
+		utils.Logger.Panic(err.Error())
 	}
 	defer pays.Close()
 
@@ -88,22 +89,22 @@ func (ori *OrderRepoImpl) GetPaymentsByOrderId(orderId string) []model.Payment {
 }
 
 func (ori *OrderRepoImpl) DeleteProduct(p *model.ProductInOrder) {
-	_, delErr := ori.db.Query(
+	_, err := ori.db.Query(
 		"DELETE FROM products_in_orders WHERE uuid = $1 AND price_per_one = $2 AND order_id = $3",
 		p.Uuid, p.PricePerOne, p.OrderId,
 	)
-	if delErr != nil {
-		panic(delErr)
+	if err != nil {
+		utils.Logger.Panic(err.Error())
 	}
 }
 
 func (ori *OrderRepoImpl) CheckAndGetProductId(p *model.ProductInOrder) (uint, bool) {
-	prodId, err1 := ori.db.Query(
+	prodId, err := ori.db.Query(
 		"SELECT id FROM products_in_orders WHERE uuid = $1 AND price_per_one = $2 AND order_id = $3",
 		p.Uuid, p.PricePerOne, p.OrderId,
 	)
-	if err1 != nil {
-		panic(err1)
+	if err != nil {
+		utils.Logger.Panic(err.Error())
 	}
 	defer prodId.Close()
 
@@ -118,48 +119,50 @@ func (ori *OrderRepoImpl) CheckAndGetProductId(p *model.ProductInOrder) (uint, b
 }
 
 func (ori *OrderRepoImpl) UpdateProductNumById(num uint, id uint) {
-	_, err2 := ori.db.Query("UPDATE products_in_orders SET num = num + $1 WHERE id = $2", num, id)
-	if err2 != nil {
-		panic(err2)
+	_, err := ori.db.Query("UPDATE products_in_orders SET num = num + $1 WHERE id = $2", num, id)
+	if err != nil {
+		utils.Logger.Panic(err.Error())
 	}
 }
 
 func (ori *OrderRepoImpl) AddProduct(p *model.ProductInOrder) {
-	_, err3 := ori.db.Query(
+	_, err := ori.db.Query(
 		"INSERT INTO products_in_orders(uuid, num, price_per_one, order_id) VALUES($1, $2, round($3, 4), $4)",
 		p.Uuid, p.Num, p.PricePerOne, p.OrderId,
 	)
-	if err3 != nil {
-		panic(err3)
+	if err != nil {
+		utils.Logger.Panic(err.Error())
 	}
 }
 
 func (ori *OrderRepoImpl) AddPayment(p *model.Payment) {
 	_, err := ori.db.Query("INSERT INTO payments(total, change, order_id) VALUES($1, $2, $3)", p.Total, p.Change, p.OrderId)
 	if err != nil {
-		panic(err)
+		utils.Logger.Panic(err.Error())
 	}
 }
 
 func (ori *OrderRepoImpl) GetById(orderId string) *model.Order {
 	res, err := ori.db.Query(
-		"SELECT o.id, o.date, o.short, s.name FROM orders o "+
+		"SELECT o.id, o.short, o.date, s.name FROM orders o "+
 			"LEFT JOIN statuses s ON o.status_id=s.id "+
 			"WHERE o.id = $1",
 		orderId,
 	)
 	if err != nil {
-		panic(err)
+		utils.Logger.Panic(err.Error())
 	}
 	defer res.Close()
 
-	var order *model.Order
-	if res.Next() {
-		res.Scan(&order.Id, &order.Short, &order.Date, &order.Status)
+	if !res.Next() {
+		return nil
 	}
+
+	var order model.Order
+	res.Scan(&order.Id, &order.Short, &order.Date, &order.Status)
 	order.Products = ori.GetProductsByOrderId(orderId)
 	order.Payments = ori.GetPaymentsByOrderId(orderId)
-	return order
+	return &order
 }
 
 func (ori *OrderRepoImpl) GetAll(from time.Time, to time.Time) []model.Order {
@@ -170,7 +173,7 @@ func (ori *OrderRepoImpl) GetAll(from time.Time, to time.Time) []model.Order {
 		from.Format("2006-01-02"), to.Format("2006-01-02"),
 	)
 	if err != nil {
-		panic(err)
+		utils.Logger.Panic(err.Error())
 	}
 	defer res.Close()
 
@@ -188,7 +191,7 @@ func (ori *OrderRepoImpl) GetAll(from time.Time, to time.Time) []model.Order {
 func (ori *OrderRepoImpl) Create() (string, uint) {
 	res, err := ori.db.Query("INSERT INTO orders(date, status_id) VALUES ($1,$2) RETURNING id, short", time.Now(), model.CREATED)
 	if err != nil {
-		panic(err)
+		utils.Logger.Panic(err.Error())
 	}
 	defer res.Close()
 	var id string
