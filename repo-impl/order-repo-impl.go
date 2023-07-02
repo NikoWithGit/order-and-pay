@@ -98,7 +98,7 @@ func (ori *OrderRepoImpl) DeleteProduct(p *model.ProductInOrder) {
 	}
 }
 
-func (ori *OrderRepoImpl) CheckAndGetProductId(p *model.ProductInOrder) (uint, bool) {
+func (ori *OrderRepoImpl) GetProductId(p *model.ProductInOrder) int {
 	prodId, err := ori.db.Query(
 		"SELECT id FROM products_in_orders WHERE uuid = $1 AND price_per_one = $2 AND order_id = $3",
 		p.Uuid, p.PricePerOne, p.OrderId,
@@ -109,12 +109,12 @@ func (ori *OrderRepoImpl) CheckAndGetProductId(p *model.ProductInOrder) (uint, b
 	defer prodId.Close()
 
 	if prodId.Next() {
-		var productId uint
+		var productId int
 		prodId.Scan(&productId)
-		return productId, true
+		return productId
 	}
 
-	return 0, false
+	return -1
 
 }
 

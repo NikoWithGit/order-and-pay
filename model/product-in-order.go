@@ -14,7 +14,7 @@ type ProductInOrder struct {
 }
 
 func (p *ProductInOrder) Validate() error {
-	if _, err := uuid.Parse(p.Uuid); err == nil {
+	if _, err := uuid.Parse(p.Uuid); err != nil {
 		return errors.New("PRODUCT VALIDATION ERROR: wrong product id")
 	}
 	if p.PricePerOne < 0 {

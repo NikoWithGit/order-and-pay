@@ -29,8 +29,20 @@ func (oc *OrderController) Create(ctx *gin.Context) {
 }
 
 func (oc *OrderController) GetAll(ctx *gin.Context) {
-	from, _ := time.Parse("2006-01-02", ctx.Query("from"))
-	to, _ := time.Parse("2006-01-02", ctx.Query("to"))
+	fromStr := ctx.Query("from")
+	toStr := ctx.Query("to")
+	if fromStr == "" || toStr == "" {
+		ctx.String(http.StatusBadRequest, "'from' and 'to' parameters are required")
+		return
+	}
+	from, err := time.Parse("2006-01-02", fromStr)
+	if err != nil {
+		ctx.String(http.StatusBadRequest, "Wrong 'from' value")
+	}
+	to, err := time.Parse("2006-01-02", toStr)
+	if err != nil {
+		ctx.String(http.StatusBadRequest, "Wrong 'to' value")
+	}
 	orders := oc.service.GetAll(from, to)
 	ctx.JSON(http.StatusOK, &orders)
 }
@@ -39,13 +51,13 @@ func (oc *OrderController) Get(ctx *gin.Context) {
 	orderId := ctx.Param("id")
 	_, err := uuid.Parse(orderId)
 	if err != nil {
-		ctx.String(http.StatusBadRequest, "Wrong id")
+		ctx.String(http.StatusBadRequest, "Wrong order_id value")
 		return
 	}
 
 	order := oc.service.Get(orderId)
 	if order == nil {
-		ctx.String(http.StatusBadRequest, "Order with id "+orderId+"doesn't exists")
+		ctx.String(http.StatusBadRequest, "Order with id "+orderId+" doesn't exists")
 		return
 	}
 
@@ -56,7 +68,7 @@ func (oc *OrderController) AddProduct(ctx *gin.Context) {
 	orderId := ctx.Param("id")
 	_, err := uuid.Parse(orderId)
 	if err != nil {
-		ctx.String(http.StatusBadRequest, "Wrong id")
+		ctx.String(http.StatusBadRequest, "Wrong order_id value")
 		return
 	}
 
@@ -68,7 +80,7 @@ func (oc *OrderController) AddProduct(ctx *gin.Context) {
 	}
 
 	errValidate := product.Validate()
-	if err != nil {
+	if errValidate != nil {
 		ctx.String(http.StatusBadRequest, errValidate.Error())
 		return
 	}
@@ -80,7 +92,7 @@ func (oc *OrderController) AddPayment(ctx *gin.Context) {
 	orderId := ctx.Param("id")
 	_, err := uuid.Parse(orderId)
 	if err != nil {
-		ctx.String(http.StatusBadRequest, "Wrong id")
+		ctx.String(http.StatusBadRequest, "Wrong order_id value")
 		return
 	}
 
@@ -92,7 +104,7 @@ func (oc *OrderController) AddPayment(ctx *gin.Context) {
 	}
 
 	errValidate := payment.Validate()
-	if err != nil {
+	if errValidate != nil {
 		ctx.String(http.StatusBadRequest, errValidate.Error())
 		return
 	}
@@ -102,7 +114,13 @@ func (oc *OrderController) AddPayment(ctx *gin.Context) {
 
 func (oc *OrderController) Finish(ctx *gin.Context) {
 	orderId := ctx.Param("id")
-	err := oc.service.Finish(orderId)
+	_, err := uuid.Parse(orderId)
+	if err != nil {
+		ctx.String(http.StatusBadRequest, "Wrong order_id value")
+		return
+	}
+
+	err = oc.service.Finish(orderId)
 	if err != nil {
 		ctx.AbortWithError(http.StatusBadRequest, err)
 		return

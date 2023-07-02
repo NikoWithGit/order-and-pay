@@ -33,9 +33,9 @@ func (os *OrderService) AddProduct(p *model.ProductInOrder) {
 		os.repo.DeleteProduct(p)
 		return
 	}
-	productId, isExists := os.repo.CheckAndGetProductId(p)
-	if isExists {
-		os.repo.UpdateProductNumById(p.Num, productId)
+	productId := os.repo.GetProductId(p)
+	if productId == -1 {
+		os.repo.UpdateProductNumById(p.Num, uint(productId))
 	} else {
 		os.repo.AddProduct(p)
 	}
