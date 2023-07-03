@@ -167,8 +167,7 @@ func (ori *OrderRepoImpl) AddProduct(p *model.ProductInOrder) {
 
 func (ori *OrderRepoImpl) AddPayment(p *model.Payment) {
 	_, err := ori.db.Query(
-		"INSERT INTO payments(total, change, order_id) VALUES($1, $2, $3)"+
-			"RETURNING total, num, price_per_one",
+		"INSERT INTO payments(total, change, order_id) VALUES($1, $2, $3)",
 		p.Total, p.Change, p.OrderId,
 	)
 	if err != nil {
