@@ -72,6 +72,8 @@ func (oc *OrderController) AddProduct(ctx *gin.Context) {
 		return
 	}
 
+	//Order existence check?
+
 	var product model.ProductInOrder
 	err = ctx.BindJSON(&product)
 	if err != nil {
@@ -103,6 +105,8 @@ func (oc *OrderController) AddPayment(ctx *gin.Context) {
 		return
 	}
 
+	//Order existence check?
+
 	errValidate := payment.Validate()
 	if errValidate != nil {
 		ctx.String(http.StatusBadRequest, errValidate.Error())
@@ -120,9 +124,16 @@ func (oc *OrderController) Finish(ctx *gin.Context) {
 		return
 	}
 
-	err = oc.service.Finish(orderId)
+	//Order existence check?
+
+	res, err := oc.service.Finish(orderId)
 	if err != nil {
-		ctx.AbortWithError(http.StatusBadRequest, err)
+		ctx.String(http.StatusBadRequest, err.Error())
 		return
 	}
+	if !res {
+		ctx.String(http.StatusOK, "Transaction is already completed")
+		return
+	}
+	ctx.String(http.StatusOK, "Transaction has been successfuly completed!")
 }

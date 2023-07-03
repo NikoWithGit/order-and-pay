@@ -41,8 +41,21 @@ func (ori *OrderRepoImpl) GetProductsPriceSumByOrderId(orderId string) float32 {
 	return priceSum
 }
 
+func (ori *OrderRepoImpl) IsExists(orderId string) bool {
+	res, err := ori.db.Query("SELECT EXISTS(SELECT id FROM orders WHERE id=$1)", orderId)
+	if err != nil {
+		utils.Logger.Panic(err.Error())
+	}
+	var result bool
+	if res.Next() {
+		res.Scan(&result)
+	}
+	return result
+
+}
+
 func (ori *OrderRepoImpl) UpdateOrderStatusToComplete(orderId string) {
-	_, err := ori.db.Query("UPDATE orders SET status_id=1 WHERE id=$1", orderId)
+	_, err := ori.db.Query("UPDATE orders SET status_id=1 WHERE id=$1 AND status_id!=1 RETURNING *", orderId)
 	if err != nil {
 		utils.Logger.Panic(err.Error())
 	}
@@ -88,14 +101,21 @@ func (ori *OrderRepoImpl) GetPaymentsByOrderId(orderId string) []model.Payment {
 	return payments
 }
 
-func (ori *OrderRepoImpl) DeleteProduct(p *model.ProductInOrder) {
-	_, err := ori.db.Query(
-		"DELETE FROM products_in_orders WHERE uuid = $1 AND price_per_one = $2 AND order_id = $3",
+func (ori *OrderRepoImpl) DeleteProduct(p *model.ProductInOrder) *model.ProductInOrder {
+	res, err := ori.db.Query(
+		"DELETE FROM products_in_orders WHERE uuid = $1 AND price_per_one = $2 AND order_id = $3"+
+			"RETURNING uuid, num, price_per_one",
 		p.Uuid, p.PricePerOne, p.OrderId,
 	)
 	if err != nil {
 		utils.Logger.Panic(err.Error())
 	}
+	if res.Next() {
+		var deletedProduct model.ProductInOrder
+		res.Scan(&deletedProduct.Uuid, &deletedProduct.Num, &deletedProduct.PricePerOne)
+		return &deletedProduct
+	}
+	return nil
 }
 
 func (ori *OrderRepoImpl) GetProductId(p *model.ProductInOrder) int {
@@ -118,11 +138,21 @@ func (ori *OrderRepoImpl) GetProductId(p *model.ProductInOrder) int {
 
 }
 
-func (ori *OrderRepoImpl) UpdateProductNumById(num uint, id uint) {
-	_, err := ori.db.Query("UPDATE products_in_orders SET num = num + $1 WHERE id = $2", num, id)
+func (ori *OrderRepoImpl) UpdateProductNumById(num uint, id uint) *model.ProductInOrder {
+	res, err := ori.db.Query(
+		"UPDATE products_in_orders SET num = num + $1 WHERE id = $2"+
+			"RETURNING uuid, num, price_per_one",
+		num, id,
+	)
 	if err != nil {
 		utils.Logger.Panic(err.Error())
 	}
+	if res.Next() {
+		var updatedProduct model.ProductInOrder
+		res.Scan(&updatedProduct.Uuid, &updatedProduct.Num, &updatedProduct.PricePerOne)
+		return &updatedProduct
+	}
+	return nil
 }
 
 func (ori *OrderRepoImpl) AddProduct(p *model.ProductInOrder) {
@@ -136,7 +166,11 @@ func (ori *OrderRepoImpl) AddProduct(p *model.ProductInOrder) {
 }
 
 func (ori *OrderRepoImpl) AddPayment(p *model.Payment) {
-	_, err := ori.db.Query("INSERT INTO payments(total, change, order_id) VALUES($1, $2, $3)", p.Total, p.Change, p.OrderId)
+	_, err := ori.db.Query(
+		"INSERT INTO payments(total, change, order_id) VALUES($1, $2, $3)"+
+			"RETURNING total, num, price_per_one",
+		p.Total, p.Change, p.OrderId,
+	)
 	if err != nil {
 		utils.Logger.Panic(err.Error())
 	}

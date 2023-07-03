@@ -45,14 +45,18 @@ func (os *OrderService) AddPayment(p *model.Payment) {
 	os.repo.AddPayment(p)
 }
 
-func (os *OrderService) Finish(orderId string) error {
+func (os *OrderService) Finish(orderId string) (bool, error) {
+	order := os.repo.GetById(orderId)
+	if order.Status == "CREATED" {
+		return false, nil
+	}
 	paymentGot := os.repo.GetPaymentsSumByOrderId(orderId)
 	paymentNeed := os.repo.GetProductsPriceSumByOrderId(orderId)
 	if !floatEq(paymentNeed, paymentGot) {
-		return errors.New("WRONG TRANSACTION PAYMENTS")
+		return false, errors.New("WRONG TRANSACTION PAYMENTS")
 	}
 	os.repo.UpdateOrderStatusToComplete(orderId)
-	return nil
+	return true, nil
 }
 
 func floatEq(f1, f2 float32) bool {

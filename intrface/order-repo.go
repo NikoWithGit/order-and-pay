@@ -16,11 +16,13 @@ type OrderRepo interface {
 	GetPaymentsSumByOrderId(orderId string) float32
 	GetProductsPriceSumByOrderId(orderId string) float32
 
-	UpdateProductNumById(num uint, id uint)
+	UpdateProductNumById(num uint, id uint) *model.ProductInOrder
 	UpdateOrderStatusToComplete(orderId string)
 
 	AddPayment(p *model.Payment)
 	AddProduct(p *model.ProductInOrder)
 
-	DeleteProduct(p *model.ProductInOrder)
+	DeleteProduct(p *model.ProductInOrder) *model.ProductInOrder
+
+	IsExists(orderId string) bool
 }

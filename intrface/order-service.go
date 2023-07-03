@@ -11,5 +11,5 @@ type OrderService interface {
 	Get(orderId string) *model.Order
 	AddProduct(p *model.ProductInOrder)
 	AddPayment(p *model.Payment)
-	Finish(orderId string) error
+	Finish(orderId string) (bool, error)
 }

@@ -1,3 +1,5 @@
+BEGIN;
+
 DROP TABLE orders;
 
 DROP TABLE payments;
@@ -10,3 +12,4 @@ DROP EXTENSION IF EXISTS "uuid-ossp";
 
 DROP SEQUENCE IF EXISTS seq_1;
 
+COMMIT;
