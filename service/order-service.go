@@ -16,47 +16,84 @@ func NewOrderService(or intrface.OrderRepo) *OrderService {
 	return &OrderService{or}
 }
 
-func (os *OrderService) Create() (string, uint) {
+func (os *OrderService) Create() (string, uint, error) {
 	return os.repo.Create()
 }
 
-func (os *OrderService) GetAll(from time.Time, to time.Time) []model.Order {
+func (os *OrderService) GetAll(from time.Time, to time.Time) ([]model.Order, error) {
 	return os.repo.GetAll(from, to)
 }
 
-func (os *OrderService) Get(orderId string) *model.Order {
+func (os *OrderService) Get(orderId string) (*model.Order, error) {
 	return os.repo.GetById(orderId)
 }
 
-func (os *OrderService) AddProduct(p *model.ProductInOrder) {
+func (os *OrderService) AddProduct(p *model.ProductInOrder) error {
+	if err := os.repo.Begin(); err != nil {
+		return err
+	}
+	defer os.repo.Rollback()
+
 	if p.Num == 0 {
-		os.repo.DeleteProduct(p)
-		return
+		err := os.repo.DeleteProduct(p)
+		return err
 	}
-	productId := os.repo.GetProductId(p)
+
+	productId, err := os.repo.GetProductId(p)
+	if err != nil {
+		return err
+	}
 	if productId == -1 {
-		os.repo.UpdateProductNumById(p.Num, uint(productId))
+		err = os.repo.UpdateProductNumById(p.Num, uint(productId))
 	} else {
-		os.repo.AddProduct(p)
+		err = os.repo.AddProduct(p)
 	}
+	if err != nil {
+		return err
+	}
+	err = os.repo.Commit()
+	return err
 }
 
-func (os *OrderService) AddPayment(p *model.Payment) {
-	os.repo.AddPayment(p)
+func (os *OrderService) AddPayment(p *model.Payment) error {
+	err := os.repo.AddPayment(p)
+	return err
 }
 
-func (os *OrderService) Finish(orderId string) (bool, error) {
-	order := os.repo.GetById(orderId)
-	if order.Status == "CREATED" {
-		return false, nil
+func (os *OrderService) Finish(orderId string) (bool, error, error) {
+
+	if err := os.repo.Begin(); err != nil {
+		return false, nil, err
 	}
-	paymentGot := os.repo.GetPaymentsSumByOrderId(orderId)
-	paymentNeed := os.repo.GetProductsPriceSumByOrderId(orderId)
+	defer os.repo.Rollback()
+
+	status, err := os.repo.GetOrderStatus(orderId)
+	if err != nil {
+		return false, nil, err
+	}
+	if status == model.CREATED {
+		return false, nil, nil
+	}
+	paymentGot, err := os.repo.GetPaymentsSumByOrderId(orderId)
+	if err != nil {
+		return false, nil, err
+	}
+	paymentNeed, err := os.repo.GetProductsPriceSumByOrderId(orderId)
+	if err != nil {
+		return false, nil, err
+	}
 	if !floatEq(paymentNeed, paymentGot) {
-		return false, errors.New("WRONG TRANSACTION PAYMENTS")
+		return false, errors.New("WRONG TRANSACTION PAYMENTS"), nil
 	}
-	os.repo.UpdateOrderStatusToComplete(orderId)
-	return true, nil
+
+	if err = os.repo.UpdateOrderStatusToComplete(orderId); err != nil {
+		return false, nil, err
+	}
+
+	if err = os.repo.Commit(); err != nil {
+		return false, nil, err
+	}
+	return true, nil, nil
 }
 
 func floatEq(f1, f2 float32) bool {

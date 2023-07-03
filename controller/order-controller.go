@@ -20,7 +20,10 @@ func NewOrderController(os *service.OrderService) *OrderController {
 }
 
 func (oc *OrderController) Create(ctx *gin.Context) {
-	id, short := oc.service.Create()
+	id, short, err := oc.service.Create()
+	if err != nil {
+		ctx.String(http.StatusInternalServerError, err.Error())
+	}
 	type Response struct {
 		Id    string `json:"id"`
 		Short uint   `json:"short"`
@@ -43,7 +46,10 @@ func (oc *OrderController) GetAll(ctx *gin.Context) {
 	if err != nil {
 		ctx.String(http.StatusBadRequest, "Wrong 'to' value")
 	}
-	orders := oc.service.GetAll(from, to)
+	orders, err := oc.service.GetAll(from, to)
+	if err != nil {
+		ctx.String(http.StatusInternalServerError, err.Error())
+	}
 	ctx.JSON(http.StatusOK, &orders)
 }
 
@@ -55,7 +61,10 @@ func (oc *OrderController) Get(ctx *gin.Context) {
 		return
 	}
 
-	order := oc.service.Get(orderId)
+	order, err := oc.service.Get(orderId)
+	if err != nil {
+		ctx.String(http.StatusInternalServerError, err.Error())
+	}
 	if order == nil {
 		ctx.String(http.StatusBadRequest, "Order with id "+orderId+" doesn't exists")
 		return
@@ -87,7 +96,10 @@ func (oc *OrderController) AddProduct(ctx *gin.Context) {
 		return
 	}
 
-	oc.service.AddProduct(&product)
+	err = oc.service.AddProduct(&product)
+	if err != nil {
+		ctx.String(http.StatusInternalServerError, err.Error())
+	}
 }
 
 func (oc *OrderController) AddPayment(ctx *gin.Context) {
@@ -113,7 +125,10 @@ func (oc *OrderController) AddPayment(ctx *gin.Context) {
 		return
 	}
 
-	oc.service.AddPayment(&payment)
+	err = oc.service.AddPayment(&payment)
+	if err != nil {
+		ctx.String(http.StatusInternalServerError, err.Error())
+	}
 }
 
 func (oc *OrderController) Finish(ctx *gin.Context) {
@@ -124,9 +139,10 @@ func (oc *OrderController) Finish(ctx *gin.Context) {
 		return
 	}
 
-	//Order existence check?
-
-	res, err := oc.service.Finish(orderId)
+	res, err, internalErr := oc.service.Finish(orderId)
+	if internalErr != nil {
+		ctx.String(http.StatusInternalServerError, internalErr.Error())
+	}
 	if err != nil {
 		ctx.String(http.StatusBadRequest, err.Error())
 		return

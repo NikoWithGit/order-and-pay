@@ -6,23 +6,26 @@ import (
 )
 
 type OrderRepo interface {
-	Create() (string, uint)
+	Create() (string, uint, error)
 
-	GetAll(from, to time.Time) []model.Order
-	GetById(orderId string) *model.Order
-	GetProductId(p *model.ProductInOrder) int
-	GetPaymentsByOrderId(orderId string) []model.Payment
-	GetProductsByOrderId(orderId string) []model.ProductInOrder
-	GetPaymentsSumByOrderId(orderId string) float32
-	GetProductsPriceSumByOrderId(orderId string) float32
+	GetAll(from, to time.Time) ([]model.Order, error)
+	GetById(orderId string) (*model.Order, error)
+	GetOrderStatus(orderId string) (uint8, error)
+	GetProductId(p *model.ProductInOrder) (int, error)
+	GetPaymentsByOrderId(orderId string) ([]model.Payment, error)
+	GetProductsByOrderId(orderId string) ([]model.ProductInOrder, error)
+	GetPaymentsSumByOrderId(orderId string) (float32, error)
+	GetProductsPriceSumByOrderId(orderId string) (float32, error)
 
-	UpdateProductNumById(num uint, id uint) *model.ProductInOrder
-	UpdateOrderStatusToComplete(orderId string)
+	UpdateProductNumById(num uint, id uint) error
+	UpdateOrderStatusToComplete(orderId string) error
 
-	AddPayment(p *model.Payment)
-	AddProduct(p *model.ProductInOrder)
+	AddPayment(p *model.Payment) error
+	AddProduct(p *model.ProductInOrder) error
 
-	DeleteProduct(p *model.ProductInOrder) *model.ProductInOrder
+	DeleteProduct(p *model.ProductInOrder) error
 
-	IsExists(orderId string) bool
+	Begin() error
+	Rollback()
+	Commit() error
 }
