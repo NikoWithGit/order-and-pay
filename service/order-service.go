@@ -9,11 +9,12 @@ import (
 )
 
 type OrderService struct {
-	repo intrface.OrderRepo
+	repo   intrface.OrderRepo
+	logger intrface.Ilogger
 }
 
-func NewOrderService(or intrface.OrderRepo) *OrderService {
-	return &OrderService{or}
+func NewOrderService(or intrface.OrderRepo, l intrface.Ilogger) *OrderService {
+	return &OrderService{or, l}
 }
 
 func (os *OrderService) Create() (string, uint, error) {
@@ -43,7 +44,7 @@ func (os *OrderService) AddProduct(p *model.ProductInOrder) error {
 	if err != nil {
 		return err
 	}
-	if productId == -1 {
+	if productId != -1 {
 		err = os.repo.UpdateProductNumById(p.Num, uint(productId))
 	} else {
 		err = os.repo.AddProduct(p)
@@ -71,7 +72,7 @@ func (os *OrderService) Finish(orderId string) (bool, error, error) {
 	if err != nil {
 		return false, nil, err
 	}
-	if status == model.CREATED {
+	if status == model.COMPLITED {
 		return false, nil, nil
 	}
 	paymentGot, err := os.repo.GetPaymentsSumByOrderId(orderId)

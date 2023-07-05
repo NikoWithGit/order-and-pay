@@ -13,10 +13,11 @@ import (
 
 type OrderController struct {
 	service intrface.OrderService
+	logger  intrface.Ilogger
 }
 
-func NewOrderController(os *service.OrderService) *OrderController {
-	return &OrderController{os}
+func NewOrderController(os *service.OrderService, l intrface.Ilogger) *OrderController {
+	return &OrderController{os, l}
 }
 
 func (oc *OrderController) Create(ctx *gin.Context) {
@@ -95,7 +96,7 @@ func (oc *OrderController) AddProduct(ctx *gin.Context) {
 		ctx.String(http.StatusBadRequest, errValidate.Error())
 		return
 	}
-
+	product.OrderId = orderId
 	err = oc.service.AddProduct(&product)
 	if err != nil {
 		ctx.String(http.StatusInternalServerError, err.Error())
@@ -124,7 +125,7 @@ func (oc *OrderController) AddPayment(ctx *gin.Context) {
 		ctx.String(http.StatusBadRequest, errValidate.Error())
 		return
 	}
-
+	payment.OrderId = orderId
 	err = oc.service.AddPayment(&payment)
 	if err != nil {
 		ctx.String(http.StatusInternalServerError, err.Error())
@@ -142,13 +143,14 @@ func (oc *OrderController) Finish(ctx *gin.Context) {
 	res, err, internalErr := oc.service.Finish(orderId)
 	if internalErr != nil {
 		ctx.String(http.StatusInternalServerError, internalErr.Error())
+		return
 	}
 	if err != nil {
 		ctx.String(http.StatusBadRequest, err.Error())
 		return
 	}
 	if !res {
-		ctx.String(http.StatusOK, "Transaction is already completed")
+		ctx.String(http.StatusOK, "Transaction has already been completed")
 		return
 	}
 	ctx.String(http.StatusOK, "Transaction has been successfuly completed!")
