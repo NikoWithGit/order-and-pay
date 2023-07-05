@@ -20,9 +20,7 @@ func main() {
 		panic(err)
 	}
 
-	err = godotenv.Load(".env")
-
-	if err != nil {
+	if err = godotenv.Load(".env"); err != nil {
 		zaplogger.Panic(err.Error())
 	}
 
@@ -39,7 +37,8 @@ func main() {
 
 	s := server.NewServer()
 	s.RegisterRoutes(orderController)
-	if err = s.Start(); err != nil {
+	err = s.Start()
+	if err != nil {
 		zaplogger.Panic(err.Error())
 	}
 }

@@ -100,7 +100,9 @@ func (oc *OrderController) AddProduct(ctx *gin.Context) {
 	err = oc.service.AddProduct(&product)
 	if err != nil {
 		ctx.String(http.StatusInternalServerError, err.Error())
+		return
 	}
+	ctx.String(http.StatusOK, "Success!")
 }
 
 func (oc *OrderController) AddPayment(ctx *gin.Context) {
@@ -130,6 +132,7 @@ func (oc *OrderController) AddPayment(ctx *gin.Context) {
 	if err != nil {
 		ctx.String(http.StatusInternalServerError, err.Error())
 	}
+	ctx.String(http.StatusOK, "Success!")
 }
 
 func (oc *OrderController) Finish(ctx *gin.Context) {

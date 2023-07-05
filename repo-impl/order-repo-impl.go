@@ -193,7 +193,7 @@ func (ori *OrderRepoImpl) GetById(orderId string) (*model.Order, error) {
 		}
 		defer ori.Rollback()
 	}
-	order, err := ori.GetRawOrderById(orderId)
+	order, err := ori.getRawOrderById(orderId)
 	if err != nil {
 		ori.logger.Error(err.Error())
 		return nil, err
@@ -216,7 +216,7 @@ func (ori *OrderRepoImpl) GetById(orderId string) (*model.Order, error) {
 	return order, nil
 }
 
-func (ori *OrderRepoImpl) GetRawOrderById(orderId string) (*model.Order, error) {
+func (ori *OrderRepoImpl) getRawOrderById(orderId string) (*model.Order, error) {
 	res, err := ori.q.Query(
 		"SELECT o.id, o.short, o.date, s.name FROM orders o "+
 			"LEFT JOIN statuses s ON o.status_id=s.id "+
@@ -246,17 +246,17 @@ func (ori *OrderRepoImpl) GetAll(from time.Time, to time.Time) ([]model.Order, e
 		defer ori.Rollback()
 	}
 
-	orders, err := ori.GetAllRaw(from, to)
+	orders, err := ori.getAllRaw(from, to)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, o := range orders {
-		o.Payments, err = ori.GetPaymentsByOrderId(o.Id)
+	for i := range orders {
+		orders[i].Payments, err = ori.GetPaymentsByOrderId(orders[i].Id)
 		if err != nil {
 			return nil, err
 		}
-		o.Products, err = ori.GetProductsByOrderId(o.Id)
+		orders[i].Products, err = ori.GetProductsByOrderId(orders[i].Id)
 		if err != nil {
 			return nil, err
 		}
@@ -271,7 +271,7 @@ func (ori *OrderRepoImpl) GetAll(from time.Time, to time.Time) ([]model.Order, e
 	return orders, nil
 }
 
-func (ori *OrderRepoImpl) GetAllRaw(from time.Time, to time.Time) ([]model.Order, error) {
+func (ori *OrderRepoImpl) getAllRaw(from time.Time, to time.Time) ([]model.Order, error) {
 	res, err := ori.q.Query(
 		"SELECT o.id, o.date, o.short, s.name FROM orders o "+
 			"LEFT JOIN statuses s ON o.status_id=s.id "+

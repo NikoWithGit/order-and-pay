@@ -2,6 +2,7 @@ include .env
 
 ##Build and Run app container
 build-app:
+	docker rmi app-image
 	docker build -t app-image .
 
 # docker run -dp 8080:8080/
