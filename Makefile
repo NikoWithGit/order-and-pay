@@ -1,6 +1,6 @@
 include .env
 
-##Build and Run app container
+##Delete app-image and build a new one
 build-app:
 	docker rmi app-image
 	docker build -t app-image .
@@ -21,7 +21,7 @@ build-app:
 migrate-up:
 	docker compose run --rm migrate up
 
-## Rollback migrations against non test DB
+## Run migrations DOWN
 migrate-down:
 	docker compose run --rm migrate down 1
 
