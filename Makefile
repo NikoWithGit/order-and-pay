@@ -1,6 +1,6 @@
 include .env
 
-##Delete app-image, build a new one and run
+##Delete app, build and run a new one 
 app-up:
 	docker rm -f app-container
 	docker rmi app-image
