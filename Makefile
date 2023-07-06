@@ -1,17 +1,19 @@
 include .env
 
-##Delete app-image and build a new one
-build-app:
+##Delete app-image, build a new one and run
+app-up:
+	docker rm -f app-container
 	docker rmi app-image
 	docker build -t app-image .
-
-# docker run -dp 8080:8080/
-# -e POSTGRES_HOST=${POSTGRES_HOST}/
-# -e POSTGRES_USER=${POSTGRES_USER}/
-# -e POSTGRES_PASSWORD=${POSTGRES_PASSWORD}/
-# -e POSTGRES_DB=${POSTGRES_DB}/
-# -e POSTGRES_PORT=${POSTGRES_PORT}/
-# app
+	docker run -dp 8080:8080\
+		--network order-and-pay-app --network-alias app\
+		-e POSTGRES_HOST=${POSTGRES_HOST}\
+		-e POSTGRES_USER=${POSTGRES_USER}\
+		-e POSTGRES_PASSWORD=${POSTGRES_PASSWORD}\
+		-e POSTGRES_DB=${POSTGRES_DB}\
+		-e POSTGRES_PORT=${POSTGRES_PORT}\
+		--name app-container\
+		app-image
 
 #========================#
 #== DATABASE MIGRATION ==#

@@ -1,16 +1,6 @@
 version: '3'
 
 services:
-  app:
-    image: app-image
-    environment:
-      - POSTGRES_HOST=${POSTGRES_HOST}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_PORT=${POSTGRES_PORT}
-    ports:
-      - 8080:8080
 
   postgresql:
     image: postgres:latest
@@ -25,6 +15,8 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    networks:
+      - order-and-pay-app
   
   migrate:
     image: migrate/migrate:v4.15.2
@@ -43,6 +35,12 @@ services:
       postgresql:
         condition: service_healthy
     restart: on-failure
+    networks:
+      - order-and-pay-app
 
 volumes:
   db-data:
+
+networks:
+  order-and-pay-app:
+    name: "order-and-pay-app"

@@ -23,7 +23,9 @@ func NewOrderController(os *service.OrderService, l intrface.Ilogger) *OrderCont
 func (oc *OrderController) Create(ctx *gin.Context) {
 	id, short, err := oc.service.Create()
 	if err != nil {
+		oc.logger.Error(err.Error())
 		ctx.String(http.StatusInternalServerError, err.Error())
+		return
 	}
 	type Response struct {
 		Id    string `json:"id"`
@@ -42,14 +44,18 @@ func (oc *OrderController) GetAll(ctx *gin.Context) {
 	from, err := time.Parse("2006-01-02", fromStr)
 	if err != nil {
 		ctx.String(http.StatusBadRequest, "Wrong 'from' value")
+		return
 	}
 	to, err := time.Parse("2006-01-02", toStr)
 	if err != nil {
 		ctx.String(http.StatusBadRequest, "Wrong 'to' value")
+		return
 	}
 	orders, err := oc.service.GetAll(from, to)
 	if err != nil {
+		oc.logger.Error(err.Error())
 		ctx.String(http.StatusInternalServerError, err.Error())
+		return
 	}
 	ctx.JSON(http.StatusOK, &orders)
 }
@@ -64,7 +70,9 @@ func (oc *OrderController) Get(ctx *gin.Context) {
 
 	order, err := oc.service.Get(orderId)
 	if err != nil {
+		oc.logger.Error(err.Error())
 		ctx.String(http.StatusInternalServerError, err.Error())
+		return
 	}
 	if order == nil {
 		ctx.String(http.StatusBadRequest, "Order with id "+orderId+" doesn't exists")
@@ -99,6 +107,7 @@ func (oc *OrderController) AddProduct(ctx *gin.Context) {
 	product.OrderId = orderId
 	err = oc.service.AddProduct(&product)
 	if err != nil {
+		oc.logger.Error(err.Error())
 		ctx.String(http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -130,7 +139,9 @@ func (oc *OrderController) AddPayment(ctx *gin.Context) {
 	payment.OrderId = orderId
 	err = oc.service.AddPayment(&payment)
 	if err != nil {
+		oc.logger.Error(err.Error())
 		ctx.String(http.StatusInternalServerError, err.Error())
+		return
 	}
 	ctx.String(http.StatusOK, "Success!")
 }
@@ -145,6 +156,7 @@ func (oc *OrderController) Finish(ctx *gin.Context) {
 
 	res, err, internalErr := oc.service.Finish(orderId)
 	if internalErr != nil {
+		oc.logger.Error(internalErr.Error())
 		ctx.String(http.StatusInternalServerError, internalErr.Error())
 		return
 	}

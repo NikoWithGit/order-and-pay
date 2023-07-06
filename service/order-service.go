@@ -9,12 +9,11 @@ import (
 )
 
 type OrderService struct {
-	repo   intrface.OrderRepo
-	logger intrface.Ilogger
+	repo intrface.OrderRepo
 }
 
-func NewOrderService(or intrface.OrderRepo, l intrface.Ilogger) *OrderService {
-	return &OrderService{or, l}
+func NewOrderService(or intrface.OrderRepo) *OrderService {
+	return &OrderService{or}
 }
 
 func (os *OrderService) Create() (string, uint, error) {

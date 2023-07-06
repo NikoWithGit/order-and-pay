@@ -8,19 +8,17 @@ import (
 )
 
 type OrderRepoImpl struct {
-	db     *sql.DB
-	q      intrface.Querier
-	logger intrface.Ilogger
+	db *sql.DB
+	q  intrface.Querier
 }
 
-func NewOrderRepoImpl(db *sql.DB, l intrface.Ilogger) *OrderRepoImpl {
-	return &OrderRepoImpl{db, db, l}
+func NewOrderRepoImpl(db *sql.DB) *OrderRepoImpl {
+	return &OrderRepoImpl{db, db}
 }
 
 func (ori *OrderRepoImpl) GetPaymentsSumByOrderId(orderId string) (float32, error) {
 	payRes, err := ori.q.Query("SELECT SUM(total)-SUM(change) FROM payments WHERE order_id=$1", orderId)
 	if err != nil {
-		ori.logger.Error(err.Error())
 		return 0, err
 	}
 	defer payRes.Close()
@@ -34,7 +32,6 @@ func (ori *OrderRepoImpl) GetPaymentsSumByOrderId(orderId string) (float32, erro
 func (ori *OrderRepoImpl) GetProductsPriceSumByOrderId(orderId string) (float32, error) {
 	prodPriceSumRes, err := ori.q.Query("SELECT SUM(num*price_per_one) FROM products_in_orders WHERE order_id=$1", orderId)
 	if err != nil {
-		ori.logger.Error(err.Error())
 		return 0, err
 	}
 	defer prodPriceSumRes.Close()
@@ -48,7 +45,6 @@ func (ori *OrderRepoImpl) GetProductsPriceSumByOrderId(orderId string) (float32,
 func (ori *OrderRepoImpl) UpdateOrderStatusToComplete(orderId string) error {
 	_, err := ori.q.Query("UPDATE orders SET status_id=2 WHERE id=$1 AND status_id!=2", orderId)
 	if err != nil {
-		ori.logger.Error(err.Error())
 		return err
 	}
 	return nil
@@ -59,7 +55,6 @@ func (ori *OrderRepoImpl) GetProductsByOrderId(orderId string) ([]model.ProductI
 		"SELECT uuid, num, price_per_one FROM products_in_orders WHERE order_id=$1", orderId,
 	)
 	if err != nil {
-		ori.logger.Error(err.Error())
 		return nil, err
 	}
 	defer prods.Close()
@@ -80,7 +75,6 @@ func (ori *OrderRepoImpl) GetPaymentsByOrderId(orderId string) ([]model.Payment,
 		"SELECT total, change FROM payments p WHERE order_id = $1", orderId,
 	)
 	if err != nil {
-		ori.logger.Error(err.Error())
 		return nil, err
 	}
 	defer pays.Close()
@@ -102,7 +96,6 @@ func (ori *OrderRepoImpl) DeleteProduct(p *model.ProductInOrder) error {
 		p.Uuid, p.PricePerOne, p.OrderId,
 	)
 	if err != nil {
-		ori.logger.Error(err.Error())
 		return err
 	}
 	return nil
@@ -114,7 +107,6 @@ func (ori *OrderRepoImpl) GetProductId(p *model.ProductInOrder) (int, error) {
 		p.Uuid, p.PricePerOne, p.OrderId,
 	)
 	if err != nil {
-		ori.logger.Error(err.Error())
 		return 0, err
 	}
 	defer prodId.Close()
@@ -134,7 +126,6 @@ func (ori *OrderRepoImpl) GetOrderStatus(orderId string) (uint8, error) {
 		orderId,
 	)
 	if err != nil {
-		ori.logger.Error(err.Error())
 		return 0, err
 	}
 	defer status.Close()
@@ -155,7 +146,6 @@ func (ori *OrderRepoImpl) UpdateProductNumById(num uint, id uint) error {
 		num, id,
 	)
 	if err != nil {
-		ori.logger.Error(err.Error())
 		return err
 	}
 	return nil
@@ -167,7 +157,6 @@ func (ori *OrderRepoImpl) AddProduct(p *model.ProductInOrder) error {
 		p.Uuid, p.Num, p.PricePerOne, p.OrderId,
 	)
 	if err != nil {
-		ori.logger.Error(err.Error())
 		return err
 	}
 	return nil
@@ -179,7 +168,6 @@ func (ori *OrderRepoImpl) AddPayment(p *model.Payment) error {
 		p.Total, p.Change, p.OrderId,
 	)
 	if err != nil {
-		ori.logger.Error(err.Error())
 		return err
 	}
 	return nil
@@ -195,7 +183,6 @@ func (ori *OrderRepoImpl) GetById(orderId string) (*model.Order, error) {
 	}
 	order, err := ori.getRawOrderById(orderId)
 	if err != nil {
-		ori.logger.Error(err.Error())
 		return nil, err
 	}
 
@@ -224,7 +211,6 @@ func (ori *OrderRepoImpl) getRawOrderById(orderId string) (*model.Order, error) 
 		orderId,
 	)
 	if err != nil {
-		ori.logger.Error(err.Error())
 		return nil, err
 	}
 	defer res.Close()
@@ -309,7 +295,6 @@ func (ori *OrderRepoImpl) Create() (string, uint, error) {
 func (ori *OrderRepoImpl) Begin() error {
 	tx, err := ori.db.Begin()
 	if err != nil {
-		ori.logger.Error(err.Error())
 		return err
 	}
 	ori.q = tx
@@ -324,7 +309,6 @@ func (ori *OrderRepoImpl) Rollback() {
 func (ori *OrderRepoImpl) Commit() error {
 	err := ori.q.(*sql.Tx).Commit()
 	if err != nil {
-		ori.logger.Error(err.Error())
 		return err
 	}
 	return nil

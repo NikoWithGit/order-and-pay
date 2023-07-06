@@ -31,8 +31,8 @@ func main() {
 	}
 	defer db.Close()
 
-	orderRepoImpl := repoimpl.NewOrderRepoImpl(db, zaplogger)
-	orderService := service.NewOrderService(orderRepoImpl, zaplogger)
+	orderRepoImpl := repoimpl.NewOrderRepoImpl(db)
+	orderService := service.NewOrderService(orderRepoImpl)
 	orderController := controller.NewOrderController(orderService, zaplogger)
 
 	s := server.NewServer()
