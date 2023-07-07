@@ -29,15 +29,15 @@ func (os *OrderService) Get(orderId string) (*model.Order, error) {
 }
 
 func (os *OrderService) AddProduct(p *model.ProductInOrder) error {
-	if err := os.repo.Begin(); err != nil {
-		return err
-	}
-	defer os.repo.Rollback()
-
 	if p.Num == 0 {
 		err := os.repo.DeleteProduct(p)
 		return err
 	}
+
+	if err := os.repo.Begin(); err != nil {
+		return err
+	}
+	defer os.repo.Rollback()
 
 	productId, err := os.repo.GetProductId(p)
 	if err != nil {
