@@ -56,8 +56,7 @@ func (os *OrderService) AddProduct(p *model.ProductInOrder) error {
 }
 
 func (os *OrderService) AddPayment(p *model.Payment) error {
-	err := os.repo.AddPayment(p)
-	return err
+	return os.repo.AddPayment(p)
 }
 
 func (os *OrderService) Finish(orderId string) (bool, error, error) {

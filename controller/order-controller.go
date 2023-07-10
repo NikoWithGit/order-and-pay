@@ -154,14 +154,14 @@ func (oc *OrderController) Finish(ctx *gin.Context) {
 		return
 	}
 
-	res, err, internalErr := oc.service.Finish(orderId)
-	if internalErr != nil {
-		oc.logger.Error(internalErr.Error())
-		ctx.String(http.StatusInternalServerError, internalErr.Error())
+	res, badRequestErr, err := oc.service.Finish(orderId)
+	if err != nil {
+		oc.logger.Error(err.Error())
+		ctx.String(http.StatusInternalServerError, err.Error())
 		return
 	}
-	if err != nil {
-		ctx.String(http.StatusBadRequest, err.Error())
+	if badRequestErr != nil {
+		ctx.String(http.StatusBadRequest, badRequestErr.Error())
 		return
 	}
 	if !res {
