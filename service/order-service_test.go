@@ -12,7 +12,7 @@ import (
 )
 
 func TestAddProduct(t *testing.T) {
-	productStandart := &model.ProductInOrder{
+	productStandard := &model.ProductInOrder{
 		Uuid:        uuid.NewString(),
 		Num:         7,
 		PricePerOne: 6.8,
@@ -43,7 +43,7 @@ func TestAddProduct(t *testing.T) {
 					m.EXPECT().Rollback(),
 				)
 			},
-			arg:   productStandart,
+			arg:   productStandard,
 			isErr: false,
 		},
 		{
@@ -59,7 +59,7 @@ func TestAddProduct(t *testing.T) {
 					m.EXPECT().Rollback(),
 				)
 			},
-			arg:   productStandart,
+			arg:   productStandard,
 			isErr: false,
 		},
 		{
@@ -81,7 +81,7 @@ func TestAddProduct(t *testing.T) {
 					m.EXPECT().Begin().Return(err),
 				)
 			},
-			arg:   productStandart,
+			arg:   productStandard,
 			isErr: true,
 		},
 	}
