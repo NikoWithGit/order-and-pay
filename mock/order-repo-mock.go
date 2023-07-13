@@ -5,6 +5,7 @@
 package mock_intrface
 
 import (
+	intrface "order-and-pay/intrface"
 	model "order-and-pay/model"
 	reflect "reflect"
 	time "time"
@@ -50,45 +51,17 @@ func (mr *MockOrderRepoMockRecorder) AddPayment(p interface{}) *gomock.Call {
 }
 
 // AddProduct mocks base method.
-func (m *MockOrderRepo) AddProduct(p *model.ProductInOrder) error {
+func (m *MockOrderRepo) AddProduct(arg0 intrface.Itx, arg1 *model.ProductInOrder) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddProduct", p)
+	ret := m.ctrl.Call(m, "AddProduct", arg0, arg1)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // AddProduct indicates an expected call of AddProduct.
-func (mr *MockOrderRepoMockRecorder) AddProduct(p interface{}) *gomock.Call {
+func (mr *MockOrderRepoMockRecorder) AddProduct(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddProduct", reflect.TypeOf((*MockOrderRepo)(nil).AddProduct), p)
-}
-
-// Begin mocks base method.
-func (m *MockOrderRepo) Begin() error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Begin")
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Begin indicates an expected call of Begin.
-func (mr *MockOrderRepoMockRecorder) Begin() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Begin", reflect.TypeOf((*MockOrderRepo)(nil).Begin))
-}
-
-// Commit mocks base method.
-func (m *MockOrderRepo) Commit() error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Commit")
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// Commit indicates an expected call of Commit.
-func (mr *MockOrderRepoMockRecorder) Commit() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Commit", reflect.TypeOf((*MockOrderRepo)(nil).Commit))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddProduct", reflect.TypeOf((*MockOrderRepo)(nil).AddProduct), arg0, arg1)
 }
 
 // Create mocks base method.
@@ -151,132 +124,134 @@ func (mr *MockOrderRepoMockRecorder) GetById(orderId interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetById", reflect.TypeOf((*MockOrderRepo)(nil).GetById), orderId)
 }
 
-// GetOrderStatus mocks base method.
-func (m *MockOrderRepo) GetOrderStatus(orderId string) (uint8, error) {
+// GetDb mocks base method.
+func (m *MockOrderRepo) GetDb() intrface.Idb {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetOrderStatus", orderId)
+	ret := m.ctrl.Call(m, "GetDb")
+	ret0, _ := ret[0].(intrface.Idb)
+	return ret0
+}
+
+// GetDb indicates an expected call of GetDb.
+func (mr *MockOrderRepoMockRecorder) GetDb() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDb", reflect.TypeOf((*MockOrderRepo)(nil).GetDb))
+}
+
+// GetOrderStatus mocks base method.
+func (m *MockOrderRepo) GetOrderStatus(tx intrface.Itx, orderId string) (uint8, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetOrderStatus", tx, orderId)
 	ret0, _ := ret[0].(uint8)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetOrderStatus indicates an expected call of GetOrderStatus.
-func (mr *MockOrderRepoMockRecorder) GetOrderStatus(orderId interface{}) *gomock.Call {
+func (mr *MockOrderRepoMockRecorder) GetOrderStatus(tx, orderId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrderStatus", reflect.TypeOf((*MockOrderRepo)(nil).GetOrderStatus), orderId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrderStatus", reflect.TypeOf((*MockOrderRepo)(nil).GetOrderStatus), tx, orderId)
 }
 
 // GetPaymentsByOrderId mocks base method.
-func (m *MockOrderRepo) GetPaymentsByOrderId(orderId string) ([]model.Payment, error) {
+func (m *MockOrderRepo) GetPaymentsByOrderId(tx intrface.Itx, orderId string) ([]model.Payment, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetPaymentsByOrderId", orderId)
+	ret := m.ctrl.Call(m, "GetPaymentsByOrderId", tx, orderId)
 	ret0, _ := ret[0].([]model.Payment)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetPaymentsByOrderId indicates an expected call of GetPaymentsByOrderId.
-func (mr *MockOrderRepoMockRecorder) GetPaymentsByOrderId(orderId interface{}) *gomock.Call {
+func (mr *MockOrderRepoMockRecorder) GetPaymentsByOrderId(tx, orderId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPaymentsByOrderId", reflect.TypeOf((*MockOrderRepo)(nil).GetPaymentsByOrderId), orderId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPaymentsByOrderId", reflect.TypeOf((*MockOrderRepo)(nil).GetPaymentsByOrderId), tx, orderId)
 }
 
 // GetPaymentsSumByOrderId mocks base method.
-func (m *MockOrderRepo) GetPaymentsSumByOrderId(orderId string) (float32, error) {
+func (m *MockOrderRepo) GetPaymentsSumByOrderId(tx intrface.Itx, orderId string) (float32, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetPaymentsSumByOrderId", orderId)
+	ret := m.ctrl.Call(m, "GetPaymentsSumByOrderId", tx, orderId)
 	ret0, _ := ret[0].(float32)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetPaymentsSumByOrderId indicates an expected call of GetPaymentsSumByOrderId.
-func (mr *MockOrderRepoMockRecorder) GetPaymentsSumByOrderId(orderId interface{}) *gomock.Call {
+func (mr *MockOrderRepoMockRecorder) GetPaymentsSumByOrderId(tx, orderId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPaymentsSumByOrderId", reflect.TypeOf((*MockOrderRepo)(nil).GetPaymentsSumByOrderId), orderId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPaymentsSumByOrderId", reflect.TypeOf((*MockOrderRepo)(nil).GetPaymentsSumByOrderId), tx, orderId)
 }
 
 // GetProductId mocks base method.
-func (m *MockOrderRepo) GetProductId(p *model.ProductInOrder) (int, error) {
+func (m *MockOrderRepo) GetProductId(tx intrface.Itx, p *model.ProductInOrder) (int, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetProductId", p)
+	ret := m.ctrl.Call(m, "GetProductId", tx, p)
 	ret0, _ := ret[0].(int)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetProductId indicates an expected call of GetProductId.
-func (mr *MockOrderRepoMockRecorder) GetProductId(p interface{}) *gomock.Call {
+func (mr *MockOrderRepoMockRecorder) GetProductId(tx, p interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProductId", reflect.TypeOf((*MockOrderRepo)(nil).GetProductId), p)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProductId", reflect.TypeOf((*MockOrderRepo)(nil).GetProductId), tx, p)
 }
 
 // GetProductsByOrderId mocks base method.
-func (m *MockOrderRepo) GetProductsByOrderId(orderId string) ([]model.ProductInOrder, error) {
+func (m *MockOrderRepo) GetProductsByOrderId(tx intrface.Itx, orderId string) ([]model.ProductInOrder, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetProductsByOrderId", orderId)
+	ret := m.ctrl.Call(m, "GetProductsByOrderId", tx, orderId)
 	ret0, _ := ret[0].([]model.ProductInOrder)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetProductsByOrderId indicates an expected call of GetProductsByOrderId.
-func (mr *MockOrderRepoMockRecorder) GetProductsByOrderId(orderId interface{}) *gomock.Call {
+func (mr *MockOrderRepoMockRecorder) GetProductsByOrderId(tx, orderId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProductsByOrderId", reflect.TypeOf((*MockOrderRepo)(nil).GetProductsByOrderId), orderId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProductsByOrderId", reflect.TypeOf((*MockOrderRepo)(nil).GetProductsByOrderId), tx, orderId)
 }
 
 // GetProductsPriceSumByOrderId mocks base method.
-func (m *MockOrderRepo) GetProductsPriceSumByOrderId(orderId string) (float32, error) {
+func (m *MockOrderRepo) GetProductsPriceSumByOrderId(tx intrface.Itx, orderId string) (float32, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetProductsPriceSumByOrderId", orderId)
+	ret := m.ctrl.Call(m, "GetProductsPriceSumByOrderId", tx, orderId)
 	ret0, _ := ret[0].(float32)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetProductsPriceSumByOrderId indicates an expected call of GetProductsPriceSumByOrderId.
-func (mr *MockOrderRepoMockRecorder) GetProductsPriceSumByOrderId(orderId interface{}) *gomock.Call {
+func (mr *MockOrderRepoMockRecorder) GetProductsPriceSumByOrderId(tx, orderId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProductsPriceSumByOrderId", reflect.TypeOf((*MockOrderRepo)(nil).GetProductsPriceSumByOrderId), orderId)
-}
-
-// Rollback mocks base method.
-func (m *MockOrderRepo) Rollback() {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "Rollback")
-}
-
-// Rollback indicates an expected call of Rollback.
-func (mr *MockOrderRepoMockRecorder) Rollback() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Rollback", reflect.TypeOf((*MockOrderRepo)(nil).Rollback))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetProductsPriceSumByOrderId", reflect.TypeOf((*MockOrderRepo)(nil).GetProductsPriceSumByOrderId), tx, orderId)
 }
 
 // UpdateOrderStatusToComplete mocks base method.
-func (m *MockOrderRepo) UpdateOrderStatusToComplete(orderId string) error {
+func (m *MockOrderRepo) UpdateOrderStatusToComplete(tx intrface.Itx, orderId string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateOrderStatusToComplete", orderId)
+	ret := m.ctrl.Call(m, "UpdateOrderStatusToComplete", tx, orderId)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // UpdateOrderStatusToComplete indicates an expected call of UpdateOrderStatusToComplete.
-func (mr *MockOrderRepoMockRecorder) UpdateOrderStatusToComplete(orderId interface{}) *gomock.Call {
+func (mr *MockOrderRepoMockRecorder) UpdateOrderStatusToComplete(tx, orderId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateOrderStatusToComplete", reflect.TypeOf((*MockOrderRepo)(nil).UpdateOrderStatusToComplete), orderId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateOrderStatusToComplete", reflect.TypeOf((*MockOrderRepo)(nil).UpdateOrderStatusToComplete), tx, orderId)
 }
 
 // UpdateProductNumById mocks base method.
-func (m *MockOrderRepo) UpdateProductNumById(num, id uint) error {
+func (m *MockOrderRepo) UpdateProductNumById(tx intrface.Itx, num, id uint) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateProductNumById", num, id)
+	ret := m.ctrl.Call(m, "UpdateProductNumById", tx, num, id)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // UpdateProductNumById indicates an expected call of UpdateProductNumById.
-func (mr *MockOrderRepoMockRecorder) UpdateProductNumById(num, id interface{}) *gomock.Call {
+func (mr *MockOrderRepoMockRecorder) UpdateProductNumById(tx, num, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateProductNumById", reflect.TypeOf((*MockOrderRepo)(nil).UpdateProductNumById), num, id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateProductNumById", reflect.TypeOf((*MockOrderRepo)(nil).UpdateProductNumById), tx, num, id)
 }

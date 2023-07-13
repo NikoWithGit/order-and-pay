@@ -10,10 +10,11 @@ import (
 
 type OrderService struct {
 	repo intrface.OrderRepo
+	db   intrface.Idb
 }
 
 func NewOrderService(or intrface.OrderRepo) *OrderService {
-	return &OrderService{or}
+	return &OrderService{or, or.GetDb()}
 }
 
 func (os *OrderService) Create() (string, uint, error) {
@@ -34,25 +35,26 @@ func (os *OrderService) AddProduct(p *model.ProductInOrder) error {
 		return err
 	}
 
-	if err := os.repo.Begin(); err != nil {
+	tx, err := os.db.Begin()
+	if err != nil {
 		return err
 	}
-	defer os.repo.Rollback()
+	defer tx.Rollback()
 
-	productId, err := os.repo.GetProductId(p)
+	productId, err := os.repo.GetProductId(tx, p)
 	if err != nil {
 		return err
 	}
 	if productId != -1 {
-		err = os.repo.UpdateProductNumById(p.Num, uint(productId))
+		err = os.repo.UpdateProductNumById(tx, p.Num, uint(productId))
 	} else {
-		err = os.repo.AddProduct(p)
+		err = os.repo.AddProduct(tx, p)
 	}
 	if err != nil {
 		return err
 	}
-	err = os.repo.Commit()
-	return err
+
+	return tx.Commit()
 }
 
 func (os *OrderService) AddPayment(p *model.Payment) error {
@@ -60,36 +62,37 @@ func (os *OrderService) AddPayment(p *model.Payment) error {
 }
 
 func (os *OrderService) Finish(orderId string) (bool, error, error) {
-
-	if err := os.repo.Begin(); err != nil {
+	tx, err := os.db.Begin()
+	if err != nil {
 		return false, nil, err
 	}
-	defer os.repo.Rollback()
+	defer tx.Rollback()
 
-	status, err := os.repo.GetOrderStatus(orderId)
+	status, err := os.repo.GetOrderStatus(tx, orderId)
 	if err != nil {
 		return false, nil, err
 	}
 	if status == model.COMPLITED {
 		return false, nil, nil
 	}
-	paymentGot, err := os.repo.GetPaymentsSumByOrderId(orderId)
+	paymentGot, err := os.repo.GetPaymentsSumByOrderId(tx, orderId)
 	if err != nil {
 		return false, nil, err
 	}
-	paymentNeed, err := os.repo.GetProductsPriceSumByOrderId(orderId)
+	paymentNeed, err := os.repo.GetProductsPriceSumByOrderId(tx, orderId)
 	if err != nil {
 		return false, nil, err
 	}
 	if !floatEq(paymentNeed, paymentGot) {
-		return false, errors.New("WRONG TRANSACTION PAYMENTS"), nil
+		badRequestError := errors.New("WRONG TRANSACTION PAYMENTS")
+		return false, badRequestError, nil
 	}
 
-	if err = os.repo.UpdateOrderStatusToComplete(orderId); err != nil {
+	if err = os.repo.UpdateOrderStatusToComplete(tx, orderId); err != nil {
 		return false, nil, err
 	}
-
-	if err = os.repo.Commit(); err != nil {
+	err = tx.Commit()
+	if err != nil {
 		return false, nil, err
 	}
 	return true, nil, nil

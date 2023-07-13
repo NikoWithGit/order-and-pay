@@ -11,6 +11,12 @@ import (
 	"github.com/golang/mock/gomock"
 )
 
+type mocks struct {
+	repo *mock_intrface.MockOrderRepo
+	db   *mock_intrface.MockIdb
+	tx   *mock_intrface.MockItx
+}
+
 func TestAddProduct(t *testing.T) {
 	productStandard := &model.ProductInOrder{
 		Uuid:        uuid.NewString(),
@@ -27,20 +33,20 @@ func TestAddProduct(t *testing.T) {
 
 	tests := []struct {
 		name        string
-		prepareMock func(m *mock_intrface.MockOrderRepo, p *model.ProductInOrder)
+		prepareMock func(m *mocks, p *model.ProductInOrder)
 		arg         *model.ProductInOrder
 		isErr       bool
 	}{
 		{
 			name: "test with successful adding new product (db hasn't got this kind of product)",
-			prepareMock: func(m *mock_intrface.MockOrderRepo, p *model.ProductInOrder) {
+			prepareMock: func(m *mocks, p *model.ProductInOrder) {
 				var err error = nil
 				gomock.InOrder(
-					m.EXPECT().Begin().Return(err),
-					m.EXPECT().GetProductId(p).Return(-1, err),
-					m.EXPECT().AddProduct(p).Return(err),
-					m.EXPECT().Commit().Return(err),
-					m.EXPECT().Rollback(),
+					m.db.EXPECT().Begin().Return(m.tx, err),
+					m.repo.EXPECT().GetProductId(m.tx, p).Return(-1, err),
+					m.repo.EXPECT().AddProduct(m.tx, p).Return(err),
+					m.tx.EXPECT().Commit().Return(err),
+					m.tx.EXPECT().Rollback(),
 				)
 			},
 			arg:   productStandard,
@@ -48,15 +54,15 @@ func TestAddProduct(t *testing.T) {
 		},
 		{
 			name: "test with successful num updating (db has got this kind of product)",
-			prepareMock: func(m *mock_intrface.MockOrderRepo, p *model.ProductInOrder) {
+			prepareMock: func(m *mocks, p *model.ProductInOrder) {
 				var err error = nil
 				productInDbRecordId := 19
 				gomock.InOrder(
-					m.EXPECT().Begin().Return(err),
-					m.EXPECT().GetProductId(p).Return(productInDbRecordId, err),
-					m.EXPECT().UpdateProductNumById(p.Num, uint(productInDbRecordId)),
-					m.EXPECT().Commit(),
-					m.EXPECT().Rollback(),
+					m.db.EXPECT().Begin().Return(m.tx, err),
+					m.repo.EXPECT().GetProductId(m.tx, p).Return(productInDbRecordId, err),
+					m.repo.EXPECT().UpdateProductNumById(m.tx, p.Num, uint(productInDbRecordId)),
+					m.tx.EXPECT().Commit().Return(err),
+					m.tx.EXPECT().Rollback(),
 				)
 			},
 			arg:   productStandard,
@@ -64,21 +70,24 @@ func TestAddProduct(t *testing.T) {
 		},
 		{
 			name: "test with successful product deleting (num = 0)",
-			prepareMock: func(m *mock_intrface.MockOrderRepo, p *model.ProductInOrder) {
+			prepareMock: func(m *mocks, p *model.ProductInOrder) {
 				var err error = nil
 				gomock.InOrder(
-					m.EXPECT().DeleteProduct(p).Return(err),
+					m.repo.EXPECT().DeleteProduct(p).Return(err),
 				)
 			},
 			arg:   productWithZeroNum,
 			isErr: false,
 		},
 		{
-			name: "test with internal error on Begin()",
-			prepareMock: func(m *mock_intrface.MockOrderRepo, p *model.ProductInOrder) {
-				var err error = errors.New("Internal error")
+			name: "test with internal error on GetProductId()",
+			prepareMock: func(m *mocks, p *model.ProductInOrder) {
+				var err error = nil
+				var internalEerr error = errors.New("Internal error")
 				gomock.InOrder(
-					m.EXPECT().Begin().Return(err),
+					m.db.EXPECT().Begin().Return(m.tx, err),
+					m.repo.EXPECT().GetProductId(m.tx, p).Return(0, internalEerr),
+					m.tx.EXPECT().Rollback(),
 				)
 			},
 			arg:   productStandard,
@@ -91,7 +100,12 @@ func TestAddProduct(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 			mockOrderRepo := mock_intrface.NewMockOrderRepo(ctrl)
-			tt.prepareMock(mockOrderRepo, tt.arg)
+			mockIdb := mock_intrface.NewMockIdb(ctrl)
+			mockItx := mock_intrface.NewMockItx(ctrl)
+
+			mockOrderRepo.EXPECT().GetDb().Return(mockIdb)
+			m := &mocks{mockOrderRepo, mockIdb, mockItx}
+			tt.prepareMock(m, tt.arg)
 			service := NewOrderService(mockOrderRepo)
 			err := service.AddProduct(tt.arg)
 			isErrorNotNil := err == nil
@@ -116,25 +130,25 @@ func TestFinish(t *testing.T) {
 
 	tests := []struct {
 		name        string
-		prepareMock func(m *mock_intrface.MockOrderRepo, orderId string)
+		prepareMock func(m *mocks, orderId string)
 		arg         string
 		exp         *Expected
 	}{
 		{
 			name: "test with successful status updating",
-			prepareMock: func(m *mock_intrface.MockOrderRepo, orderId string) {
+			prepareMock: func(m *mocks, orderId string) {
 				status := model.CREATED
 				var err error = nil
 				paymentsSum := float32(25.7)
 				productsPricesSum := paymentsSum
 				gomock.InOrder(
-					m.EXPECT().Begin().Return(err),
-					m.EXPECT().GetOrderStatus(orderId).Return(status, err),
-					m.EXPECT().GetPaymentsSumByOrderId(orderId).Return(paymentsSum, err),
-					m.EXPECT().GetProductsPriceSumByOrderId(orderId).Return(productsPricesSum, err),
-					m.EXPECT().UpdateOrderStatusToComplete(orderId).Return(err),
-					m.EXPECT().Commit(),
-					m.EXPECT().Rollback(),
+					m.db.EXPECT().Begin().Return(m.tx, err),
+					m.repo.EXPECT().GetOrderStatus(m.tx, orderId).Return(status, err),
+					m.repo.EXPECT().GetPaymentsSumByOrderId(m.tx, orderId).Return(paymentsSum, err),
+					m.repo.EXPECT().GetProductsPriceSumByOrderId(m.tx, orderId).Return(productsPricesSum, err),
+					m.repo.EXPECT().UpdateOrderStatusToComplete(m.tx, orderId).Return(err),
+					m.tx.EXPECT().Commit().Return(err),
+					m.tx.EXPECT().Rollback(),
 				)
 			},
 			arg: uuid.NewString(),
@@ -146,13 +160,13 @@ func TestFinish(t *testing.T) {
 		},
 		{
 			name: "test without status updating, coz its already updated",
-			prepareMock: func(m *mock_intrface.MockOrderRepo, orderId string) {
+			prepareMock: func(m *mocks, orderId string) {
 				status := model.COMPLITED
 				var err error = nil
 				gomock.InOrder(
-					m.EXPECT().Begin().Return(nil),
-					m.EXPECT().GetOrderStatus(orderId).Return(status, err),
-					m.EXPECT().Rollback(),
+					m.db.EXPECT().Begin().Return(m.tx, err),
+					m.repo.EXPECT().GetOrderStatus(m.tx, orderId).Return(status, err),
+					m.tx.EXPECT().Rollback(),
 				)
 			},
 			arg: uuid.NewString(),
@@ -164,17 +178,17 @@ func TestFinish(t *testing.T) {
 		},
 		{
 			name: "test with badRequestError",
-			prepareMock: func(m *mock_intrface.MockOrderRepo, orderId string) {
+			prepareMock: func(m *mocks, orderId string) {
 				status := model.CREATED
 				var err error = nil
 				paymentsSum := float32(25.7)
 				productsPricesSum := float32(13.9)
 				gomock.InOrder(
-					m.EXPECT().Begin().Return(err),
-					m.EXPECT().GetOrderStatus(orderId).Return(status, err),
-					m.EXPECT().GetPaymentsSumByOrderId(orderId).Return(paymentsSum, err),
-					m.EXPECT().GetProductsPriceSumByOrderId(orderId).Return(productsPricesSum, err),
-					m.EXPECT().Rollback(),
+					m.db.EXPECT().Begin().Return(m.tx, err),
+					m.repo.EXPECT().GetOrderStatus(m.tx, orderId).Return(status, err),
+					m.repo.EXPECT().GetPaymentsSumByOrderId(m.tx, orderId).Return(paymentsSum, err),
+					m.repo.EXPECT().GetProductsPriceSumByOrderId(m.tx, orderId).Return(productsPricesSum, err),
+					m.tx.EXPECT().Rollback(),
 				)
 			},
 			arg: uuid.NewString(),
@@ -185,11 +199,14 @@ func TestFinish(t *testing.T) {
 			},
 		},
 		{
-			name: "test with internalError on Begin()",
-			prepareMock: func(m *mock_intrface.MockOrderRepo, orderId string) {
-				err := errors.New("Internal error")
+			name: "test with internalError on GetOrderStatus()",
+			prepareMock: func(m *mocks, orderId string) {
+				var err error = nil
+				internalErr := errors.New("Internal error")
 				gomock.InOrder(
-					m.EXPECT().Begin().Return(err),
+					m.db.EXPECT().Begin().Return(m.tx, err),
+					m.repo.EXPECT().GetOrderStatus(m.tx, orderId).Return(uint8(0), internalErr),
+					m.tx.EXPECT().Rollback(),
 				)
 			},
 			arg: uuid.NewString(),
@@ -206,7 +223,12 @@ func TestFinish(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 			mockOrderRepo := mock_intrface.NewMockOrderRepo(ctrl)
-			tt.prepareMock(mockOrderRepo, tt.arg)
+			mockIdb := mock_intrface.NewMockIdb(ctrl)
+			mockItx := mock_intrface.NewMockItx(ctrl)
+
+			mockOrderRepo.EXPECT().GetDb().Return(mockIdb)
+			m := &mocks{mockOrderRepo, mockIdb, mockItx}
+			tt.prepareMock(m, tt.arg)
 			service := NewOrderService(mockOrderRepo)
 			isUpdated, badRequestError, err := service.Finish(tt.arg)
 			isBadRequestError := (badRequestError != nil)

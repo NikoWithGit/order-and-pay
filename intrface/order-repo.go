@@ -10,22 +10,20 @@ type OrderRepo interface {
 
 	GetAll(from, to time.Time) ([]model.Order, error)
 	GetById(orderId string) (*model.Order, error)
-	GetOrderStatus(orderId string) (uint8, error)
-	GetProductId(p *model.ProductInOrder) (int, error)
-	GetPaymentsByOrderId(orderId string) ([]model.Payment, error)
-	GetProductsByOrderId(orderId string) ([]model.ProductInOrder, error)
-	GetPaymentsSumByOrderId(orderId string) (float32, error)
-	GetProductsPriceSumByOrderId(orderId string) (float32, error)
+	GetOrderStatus(tx Itx, orderId string) (uint8, error)
+	GetProductId(tx Itx, p *model.ProductInOrder) (int, error)
+	GetPaymentsByOrderId(tx Itx, orderId string) ([]model.Payment, error)
+	GetProductsByOrderId(tx Itx, orderId string) ([]model.ProductInOrder, error)
+	GetPaymentsSumByOrderId(tx Itx, orderId string) (float32, error)
+	GetProductsPriceSumByOrderId(tx Itx, orderId string) (float32, error)
 
-	UpdateProductNumById(num uint, id uint) error
-	UpdateOrderStatusToComplete(orderId string) error
+	UpdateProductNumById(tx Itx, num uint, id uint) error
+	UpdateOrderStatusToComplete(tx Itx, orderId string) error
 
 	AddPayment(p *model.Payment) error
-	AddProduct(p *model.ProductInOrder) error
+	AddProduct(Itx, *model.ProductInOrder) error
 
 	DeleteProduct(p *model.ProductInOrder) error
 
-	Begin() error
-	Rollback()
-	Commit() error
+	GetDb() Idb
 }

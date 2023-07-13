@@ -1,9 +1,8 @@
 package main
 
 import (
-	"database/sql"
 	"order-and-pay/controller"
-	"order-and-pay/env"
+	"order-and-pay/db"
 	"order-and-pay/logger"
 	repoimpl "order-and-pay/repo-impl"
 	"order-and-pay/server"
@@ -24,8 +23,7 @@ func main() {
 		zaplogger.Panic(err.Error())
 	}
 
-	dsn := env.GetDbDsn()
-	db, err := sql.Open("postgres", dsn)
+	db, err := db.NewSqlDb()
 	if err != nil {
 		zaplogger.Panic(err.Error())
 	}
