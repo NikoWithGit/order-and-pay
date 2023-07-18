@@ -14,7 +14,7 @@ import (
 type mocks struct {
 	repo *mock_intrface.MockOrderRepo
 	db   *mock_intrface.MockIdb
-	tx   *mock_intrface.MockItx
+	tx   *mock_intrface.MockIdb
 }
 
 func TestAddProduct(t *testing.T) {
@@ -101,7 +101,7 @@ func TestAddProduct(t *testing.T) {
 			defer ctrl.Finish()
 			mockOrderRepo := mock_intrface.NewMockOrderRepo(ctrl)
 			mockIdb := mock_intrface.NewMockIdb(ctrl)
-			mockItx := mock_intrface.NewMockItx(ctrl)
+			mockItx := mock_intrface.NewMockIdb(ctrl)
 
 			mockOrderRepo.EXPECT().GetDb().Return(mockIdb)
 			m := &mocks{mockOrderRepo, mockIdb, mockItx}
@@ -224,7 +224,7 @@ func TestFinish(t *testing.T) {
 			defer ctrl.Finish()
 			mockOrderRepo := mock_intrface.NewMockOrderRepo(ctrl)
 			mockIdb := mock_intrface.NewMockIdb(ctrl)
-			mockItx := mock_intrface.NewMockItx(ctrl)
+			mockItx := mock_intrface.NewMockIdb(ctrl)
 
 			mockOrderRepo.EXPECT().GetDb().Return(mockIdb)
 			m := &mocks{mockOrderRepo, mockIdb, mockItx}

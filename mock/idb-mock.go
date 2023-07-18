@@ -5,6 +5,7 @@
 package mock_intrface
 
 import (
+	sql "database/sql"
 	intrface "order-and-pay/intrface"
 	reflect "reflect"
 
@@ -35,10 +36,10 @@ func (m *MockIdb) EXPECT() *MockIdbMockRecorder {
 }
 
 // Begin mocks base method.
-func (m *MockIdb) Begin() (intrface.Itx, error) {
+func (m *MockIdb) Begin() (intrface.Idb, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Begin")
-	ret0, _ := ret[0].(intrface.Itx)
+	ret0, _ := ret[0].(intrface.Idb)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -47,4 +48,103 @@ func (m *MockIdb) Begin() (intrface.Itx, error) {
 func (mr *MockIdbMockRecorder) Begin() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Begin", reflect.TypeOf((*MockIdb)(nil).Begin))
+}
+
+// Commit mocks base method.
+func (m *MockIdb) Commit() error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Commit")
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Commit indicates an expected call of Commit.
+func (mr *MockIdbMockRecorder) Commit() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Commit", reflect.TypeOf((*MockIdb)(nil).Commit))
+}
+
+// Query mocks base method.
+func (m *MockIdb) Query(arg0 string, arg1 ...any) (*sql.Rows, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{arg0}
+	for _, a := range arg1 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "Query", varargs...)
+	ret0, _ := ret[0].(*sql.Rows)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Query indicates an expected call of Query.
+func (mr *MockIdbMockRecorder) Query(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{arg0}, arg1...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Query", reflect.TypeOf((*MockIdb)(nil).Query), varargs...)
+}
+
+// Rollback mocks base method.
+func (m *MockIdb) Rollback() error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Rollback")
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Rollback indicates an expected call of Rollback.
+func (mr *MockIdbMockRecorder) Rollback() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Rollback", reflect.TypeOf((*MockIdb)(nil).Rollback))
+}
+
+// MockItx is a mock of Itx interface.
+type MockItx struct {
+	ctrl     *gomock.Controller
+	recorder *MockItxMockRecorder
+}
+
+// MockItxMockRecorder is the mock recorder for MockItx.
+type MockItxMockRecorder struct {
+	mock *MockItx
+}
+
+// NewMockItx creates a new mock instance.
+func NewMockItx(ctrl *gomock.Controller) *MockItx {
+	mock := &MockItx{ctrl: ctrl}
+	mock.recorder = &MockItxMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockItx) EXPECT() *MockItxMockRecorder {
+	return m.recorder
+}
+
+// Commit mocks base method.
+func (m *MockItx) Commit() error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Commit")
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Commit indicates an expected call of Commit.
+func (mr *MockItxMockRecorder) Commit() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Commit", reflect.TypeOf((*MockItx)(nil).Commit))
+}
+
+// Rollback mocks base method.
+func (m *MockItx) Rollback() error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Rollback")
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Rollback indicates an expected call of Rollback.
+func (mr *MockItxMockRecorder) Rollback() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Rollback", reflect.TypeOf((*MockItx)(nil).Rollback))
 }

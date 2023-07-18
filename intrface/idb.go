@@ -1,5 +1,14 @@
 package intrface
 
+import "database/sql"
+
 type Idb interface {
-	Begin() (Itx, error)
+	Itx
+	Begin() (Idb, error)
+	Query(string, ...any) (*sql.Rows, error)
+}
+
+type Itx interface {
+	Rollback() error
+	Commit() error
 }
