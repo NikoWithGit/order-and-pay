@@ -9,7 +9,7 @@ type SqlTx struct {
 	*sql.Tx
 }
 
-func NewSqlTx(tx *sql.Tx) intrface.Idb {
+func NewSqlTx(tx *sql.Tx) intrface.Itx {
 	return &SqlTx{tx}
 }
 
@@ -21,6 +21,6 @@ func (tx *SqlTx) Rollback() error {
 	return tx.Tx.Rollback()
 }
 
-func (tx *SqlTx) Begin() (intrface.Idb, error) {
+func (tx *SqlTx) Begin() (intrface.Itx, error) {
 	return nil, nil
 }

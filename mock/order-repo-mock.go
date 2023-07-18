@@ -51,7 +51,7 @@ func (mr *MockOrderRepoMockRecorder) AddPayment(p interface{}) *gomock.Call {
 }
 
 // AddProduct mocks base method.
-func (m *MockOrderRepo) AddProduct(arg0 intrface.Idb, arg1 *model.ProductInOrder) error {
+func (m *MockOrderRepo) AddProduct(arg0 intrface.Itx, arg1 *model.ProductInOrder) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "AddProduct", arg0, arg1)
 	ret0, _ := ret[0].(error)
@@ -139,7 +139,7 @@ func (mr *MockOrderRepoMockRecorder) GetDb() *gomock.Call {
 }
 
 // GetOrderStatus mocks base method.
-func (m *MockOrderRepo) GetOrderStatus(tx intrface.Idb, orderId string) (uint8, error) {
+func (m *MockOrderRepo) GetOrderStatus(tx intrface.Itx, orderId string) (uint8, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetOrderStatus", tx, orderId)
 	ret0, _ := ret[0].(uint8)
@@ -169,7 +169,7 @@ func (mr *MockOrderRepoMockRecorder) GetPaymentsByOrderId(orderId interface{}) *
 }
 
 // GetPaymentsSumByOrderId mocks base method.
-func (m *MockOrderRepo) GetPaymentsSumByOrderId(tx intrface.Idb, orderId string) (float32, error) {
+func (m *MockOrderRepo) GetPaymentsSumByOrderId(tx intrface.Itx, orderId string) (float32, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetPaymentsSumByOrderId", tx, orderId)
 	ret0, _ := ret[0].(float32)
@@ -184,7 +184,7 @@ func (mr *MockOrderRepoMockRecorder) GetPaymentsSumByOrderId(tx, orderId interfa
 }
 
 // GetProductId mocks base method.
-func (m *MockOrderRepo) GetProductId(tx intrface.Idb, p *model.ProductInOrder) (int, error) {
+func (m *MockOrderRepo) GetProductId(tx intrface.Itx, p *model.ProductInOrder) (int, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetProductId", tx, p)
 	ret0, _ := ret[0].(int)
@@ -214,7 +214,7 @@ func (mr *MockOrderRepoMockRecorder) GetProductsByOrderId(orderId interface{}) *
 }
 
 // GetProductsPriceSumByOrderId mocks base method.
-func (m *MockOrderRepo) GetProductsPriceSumByOrderId(tx intrface.Idb, orderId string) (float32, error) {
+func (m *MockOrderRepo) GetProductsPriceSumByOrderId(tx intrface.Itx, orderId string) (float32, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetProductsPriceSumByOrderId", tx, orderId)
 	ret0, _ := ret[0].(float32)
@@ -229,7 +229,7 @@ func (mr *MockOrderRepoMockRecorder) GetProductsPriceSumByOrderId(tx, orderId in
 }
 
 // UpdateOrderStatusToComplete mocks base method.
-func (m *MockOrderRepo) UpdateOrderStatusToComplete(tx intrface.Idb, orderId string) error {
+func (m *MockOrderRepo) UpdateOrderStatusToComplete(tx intrface.Itx, orderId string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateOrderStatusToComplete", tx, orderId)
 	ret0, _ := ret[0].(error)
@@ -243,7 +243,7 @@ func (mr *MockOrderRepoMockRecorder) UpdateOrderStatusToComplete(tx, orderId int
 }
 
 // UpdateProductNumById mocks base method.
-func (m *MockOrderRepo) UpdateProductNumById(tx intrface.Idb, num, id uint) error {
+func (m *MockOrderRepo) UpdateProductNumById(tx intrface.Itx, num, id uint) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateProductNumById", tx, num, id)
 	ret0, _ := ret[0].(error)

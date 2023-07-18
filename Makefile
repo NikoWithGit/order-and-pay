@@ -1,9 +1,12 @@
 include .env
 
-##Delete app, build and run a new one 
-app-up:
+## Delete app
+app-rm:
 	docker rm -f app-container
 	docker rmi app-image
+
+## Build and run app
+app-up:
 	docker build -t app-image .
 	docker run -dp 8080:8080\
 		--network order-and-pay-app --network-alias app\

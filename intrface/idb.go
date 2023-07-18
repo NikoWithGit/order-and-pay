@@ -3,12 +3,12 @@ package intrface
 import "database/sql"
 
 type Idb interface {
-	Itx
-	Begin() (Idb, error)
+	Begin() (Itx, error)
 	Query(string, ...any) (*sql.Rows, error)
 }
 
 type Itx interface {
+	Idb
 	Rollback() error
 	Commit() error
 }
