@@ -24,7 +24,3 @@ func (tx *SqlTx) Rollback() error {
 func (tx *SqlTx) Begin() (intrface.Idb, error) {
 	return nil, nil
 }
-
-func (tx *SqlTx) Query(string, ...any) (*sql.Rows, error) {
-	return nil, nil
-}
