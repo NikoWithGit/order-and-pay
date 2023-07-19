@@ -26,3 +26,15 @@ func (zl *ZapLooger) Error(s string) {
 func (zl *ZapLooger) Panic(s string) {
 	zl.l.Panic(s)
 }
+
+func (zl *ZapLooger) Infof(template string, args ...interface{}) {
+	zl.l.Sugar().Infof(template, args...)
+}
+
+func (zl *ZapLooger) Errorf(template string, args ...interface{}) {
+	zl.l.Sugar().Errorf(template, args...)
+}
+
+func (zl *ZapLooger) Panicf(template string, args ...interface{}) {
+	zl.l.Sugar().Panicf(template, args...)
+}

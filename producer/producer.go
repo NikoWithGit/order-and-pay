@@ -1,16 +1,17 @@
 package producer
 
 import (
-	"fmt"
+	"order-and-pay/iface"
 
 	"github.com/IBM/sarama"
 )
 
 type KafkaProducer struct {
 	sarama.SyncProducer
+	logger iface.Ilogger
 }
 
-func NewKafkaProducer(brokersUrl []string) (*KafkaProducer, error) {
+func NewKafkaProducer(brokersUrl []string, l iface.Ilogger) (*KafkaProducer, error) {
 	config := sarama.NewConfig()
 	config.Producer.Return.Successes = true
 	config.Producer.RequiredAcks = sarama.WaitForAll
@@ -20,7 +21,7 @@ func NewKafkaProducer(brokersUrl []string) (*KafkaProducer, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &KafkaProducer{syncProducer}, nil
+	return &KafkaProducer{syncProducer, l}, nil
 }
 
 func (p *KafkaProducer) PushMessageToQueue(topic string, message []byte) error {
@@ -32,6 +33,6 @@ func (p *KafkaProducer) PushMessageToQueue(topic string, message []byte) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Message is stored in topic(%s)/partition(%d)/offset(%d)\n", topic, partition, offset)
+	p.logger.Infof("Message is stored in topic(%s)/partition(%d)/offset(%d)\n", topic, partition, offset)
 	return nil
 }
