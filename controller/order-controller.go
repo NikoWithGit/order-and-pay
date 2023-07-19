@@ -1,8 +1,9 @@
 package controller
 
 import (
+	"encoding/json"
 	"net/http"
-	"order-and-pay/intrface"
+	intrface "order-and-pay/iface"
 	"order-and-pay/model"
 	"order-and-pay/service"
 	"time"
@@ -12,12 +13,13 @@ import (
 )
 
 type OrderController struct {
-	service intrface.OrderService
-	logger  intrface.Ilogger
+	service  intrface.OrderService
+	producer intrface.Iproducer
+	logger   intrface.Ilogger
 }
 
-func NewOrderController(os *service.OrderService, l intrface.Ilogger) *OrderController {
-	return &OrderController{os, l}
+func NewOrderController(os *service.OrderService, p intrface.Iproducer, l intrface.Ilogger) *OrderController {
+	return &OrderController{os, p, l}
 }
 
 func (oc *OrderController) Create(ctx *gin.Context) {
@@ -168,5 +170,29 @@ func (oc *OrderController) Finish(ctx *gin.Context) {
 		ctx.String(http.StatusOK, "Transaction has already been completed")
 		return
 	}
-	ctx.String(http.StatusOK, "Transaction has been successfuly completed!")
+
+	err = oc.PushOrderToQueue(orderId)
+	if err != nil {
+		ctx.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	ctx.String(http.StatusOK, "Transaction has been successfully completed!")
+}
+
+func (oc *OrderController) PushOrderToQueue(orderId string) error {
+	order, err := oc.service.Get(orderId)
+	if err != nil {
+		return err
+	}
+
+	orderJson, err := json.Marshal(order)
+	if err != nil {
+		return err
+	}
+	err = oc.producer.PushMessageToQueue("order-complete", orderJson)
+	if err != nil {
+		return err
+	}
+	return nil
 }

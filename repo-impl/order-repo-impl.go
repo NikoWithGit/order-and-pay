@@ -2,7 +2,7 @@ package repoimpl
 
 import (
 	"order-and-pay/db"
-	"order-and-pay/intrface"
+	"order-and-pay/iface"
 	"order-and-pay/model"
 	"time"
 )
@@ -15,7 +15,7 @@ func NewOrderRepoImpl(db *db.SqlDb) *OrderRepoImpl {
 	return &OrderRepoImpl{db}
 }
 
-func (ori *OrderRepoImpl) GetPaymentsSumByOrderId(tx intrface.Itx, orderId string) (float32, error) {
+func (ori *OrderRepoImpl) GetPaymentsSumByOrderId(tx iface.Itx, orderId string) (float32, error) {
 	payRes, err := tx.Query("SELECT SUM(total)-SUM(change) FROM payments WHERE order_id=$1", orderId)
 	if err != nil {
 		return 0, err
@@ -28,7 +28,7 @@ func (ori *OrderRepoImpl) GetPaymentsSumByOrderId(tx intrface.Itx, orderId strin
 	return paymentSum, nil
 }
 
-func (ori *OrderRepoImpl) GetProductsPriceSumByOrderId(tx intrface.Itx, orderId string) (float32, error) {
+func (ori *OrderRepoImpl) GetProductsPriceSumByOrderId(tx iface.Itx, orderId string) (float32, error) {
 	prodPriceSumRes, err := tx.Query("SELECT SUM(num*price_per_one) FROM products_in_orders WHERE order_id=$1", orderId)
 	if err != nil {
 		return 0, err
@@ -41,7 +41,7 @@ func (ori *OrderRepoImpl) GetProductsPriceSumByOrderId(tx intrface.Itx, orderId 
 	return priceSum, nil
 }
 
-func (ori *OrderRepoImpl) UpdateOrderStatusToComplete(tx intrface.Itx, orderId string) error {
+func (ori *OrderRepoImpl) UpdateOrderStatusToComplete(tx iface.Itx, orderId string) error {
 	_, err := tx.Query("UPDATE orders SET status_id=2 WHERE id=$1 AND status_id!=2", orderId)
 	if err != nil {
 		return err
@@ -100,7 +100,7 @@ func (ori *OrderRepoImpl) DeleteProduct(p *model.ProductInOrder) error {
 	return nil
 }
 
-func (ori *OrderRepoImpl) GetProductId(tx intrface.Itx, p *model.ProductInOrder) (int, error) {
+func (ori *OrderRepoImpl) GetProductId(tx iface.Itx, p *model.ProductInOrder) (int, error) {
 	prodId, err := tx.Query(
 		"SELECT id FROM products_in_orders WHERE uuid = $1 AND price_per_one = $2 AND order_id = $3",
 		p.Uuid, p.PricePerOne, p.OrderId,
@@ -119,7 +119,7 @@ func (ori *OrderRepoImpl) GetProductId(tx intrface.Itx, p *model.ProductInOrder)
 	return -1, nil
 }
 
-func (ori *OrderRepoImpl) GetOrderStatus(tx intrface.Itx, orderId string) (uint8, error) {
+func (ori *OrderRepoImpl) GetOrderStatus(tx iface.Itx, orderId string) (uint8, error) {
 	status, err := tx.Query(
 		"SELECT status_id FROM orders WHERE id=$1",
 		orderId,
@@ -139,7 +139,7 @@ func (ori *OrderRepoImpl) GetOrderStatus(tx intrface.Itx, orderId string) (uint8
 
 }
 
-func (ori *OrderRepoImpl) UpdateProductNumById(tx intrface.Itx, num uint, id uint) error {
+func (ori *OrderRepoImpl) UpdateProductNumById(tx iface.Itx, num uint, id uint) error {
 	_, err := tx.Query(
 		"UPDATE products_in_orders SET num = num + $1 WHERE id = $2",
 		num, id,
@@ -150,7 +150,7 @@ func (ori *OrderRepoImpl) UpdateProductNumById(tx intrface.Itx, num uint, id uin
 	return nil
 }
 
-func (ori *OrderRepoImpl) AddProduct(tx intrface.Itx, p *model.ProductInOrder) error {
+func (ori *OrderRepoImpl) AddProduct(tx iface.Itx, p *model.ProductInOrder) error {
 	_, err := tx.Query(
 		"INSERT INTO products_in_orders(uuid, num, price_per_one, order_id) VALUES($1, $2, round($3, 4), $4)",
 		p.Uuid, p.Num, p.PricePerOne, p.OrderId,
@@ -266,6 +266,6 @@ func (ori *OrderRepoImpl) Create() (string, uint, error) {
 	return id, short, nil
 }
 
-func (ori *OrderRepoImpl) GetDb() intrface.Idb {
+func (ori *OrderRepoImpl) GetDb() iface.Idb {
 	return ori.db
 }

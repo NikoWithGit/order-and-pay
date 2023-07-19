@@ -2,14 +2,14 @@ package db
 
 import (
 	"database/sql"
-	"order-and-pay/intrface"
+	"order-and-pay/iface"
 )
 
 type SqlTx struct {
 	*sql.Tx
 }
 
-func NewSqlTx(tx *sql.Tx) intrface.Itx {
+func NewSqlTx(tx *sql.Tx) iface.Itx {
 	return &SqlTx{tx}
 }
 
@@ -21,6 +21,6 @@ func (tx *SqlTx) Rollback() error {
 	return tx.Tx.Rollback()
 }
 
-func (tx *SqlTx) Begin() (intrface.Itx, error) {
+func (tx *SqlTx) Begin() (iface.Itx, error) {
 	return nil, nil
 }

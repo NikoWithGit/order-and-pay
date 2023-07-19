@@ -3,7 +3,7 @@ package db
 import (
 	"database/sql"
 	"order-and-pay/env"
-	"order-and-pay/intrface"
+	"order-and-pay/iface"
 )
 
 type SqlDb struct {
@@ -16,7 +16,7 @@ func NewSqlDb() (*SqlDb, error) {
 	return &SqlDb{db}, err
 }
 
-func (db *SqlDb) Begin() (intrface.Itx, error) {
+func (db *SqlDb) Begin() (iface.Itx, error) {
 	tx, err := db.DB.Begin()
 	return NewSqlTx(tx), err
 }

@@ -3,17 +3,17 @@ package service
 import (
 	"errors"
 	"math"
-	"order-and-pay/intrface"
+	"order-and-pay/iface"
 	"order-and-pay/model"
 	"time"
 )
 
 type OrderService struct {
-	repo intrface.OrderRepo
-	db   intrface.Idb
+	repo iface.OrderRepo
+	db   iface.Idb
 }
 
-func NewOrderService(or intrface.OrderRepo) *OrderService {
+func NewOrderService(or iface.OrderRepo) *OrderService {
 	return &OrderService{or, or.GetDb()}
 }
 
