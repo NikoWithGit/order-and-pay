@@ -33,7 +33,7 @@ func main() {
 	defer db.Close()
 
 	//Producer init
-	producer, err := producer.NewKafkaProducer([]string{"order-and-pay-kafka-1:9092"}, zaplogger)
+	producer, err := producer.NewKafkaProducer([]string{"oap-reports-kafka-1:9092"}, zaplogger)
 	if err != nil {
 		zaplogger.Error(err.Error())
 	}
