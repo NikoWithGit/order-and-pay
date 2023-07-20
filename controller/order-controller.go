@@ -171,7 +171,7 @@ func (oc *OrderController) Finish(ctx *gin.Context) {
 		return
 	}
 
-	err = oc.PushOrderToQueue(orderId)
+	err = oc.pushOrderToQueue(orderId)
 	if err != nil {
 		ctx.String(http.StatusInternalServerError, err.Error())
 		return
@@ -180,13 +180,13 @@ func (oc *OrderController) Finish(ctx *gin.Context) {
 	ctx.String(http.StatusOK, "Transaction has been successfully completed!")
 }
 
-func (oc *OrderController) PushOrderToQueue(orderId string) error {
+func (oc *OrderController) pushOrderToQueue(orderId string) error {
 	order, err := oc.service.Get(orderId)
 	if err != nil {
 		return err
 	}
 
-	orderJson, err := json.Marshal(order)
+	orderJson, err := json.Marshal(order.GetOrderReport())
 	if err != nil {
 		return err
 	}

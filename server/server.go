@@ -18,9 +18,5 @@ func (s *server) Start() error {
 	if s.Gin == nil {
 		return errors.New("ERROR:No Gin Engine")
 	}
-	err := s.Gin.Run()
-	if err != nil {
-		return err
-	}
-	return nil
+	return s.Gin.Run(":8080")
 }

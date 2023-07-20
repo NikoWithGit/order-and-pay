@@ -42,7 +42,7 @@ func (ori *OrderRepoImpl) GetProductsPriceSumByOrderId(tx iface.Itx, orderId str
 }
 
 func (ori *OrderRepoImpl) UpdateOrderStatusToComplete(tx iface.Itx, orderId string) error {
-	_, err := tx.Query("UPDATE orders SET status_id=2 WHERE id=$1 AND status_id!=2", orderId)
+	_, err := tx.Query("UPDATE orders SET status_id=2, date = NOW() WHERE id=$1 AND status_id!=2", orderId)
 	if err != nil {
 		return err
 	}
@@ -235,7 +235,7 @@ func (ori *OrderRepoImpl) getAllRaw(from time.Time, to time.Time) ([]model.Order
 	res, err := ori.db.Query(
 		"SELECT o.id, o.date, o.short, s.name FROM orders o "+
 			"LEFT JOIN statuses s ON o.status_id=s.id "+
-			"WHERE o.date BETWEEN $1 AND $2",
+			"WHERE (o.date BETWEEN $1 AND $2) AND (s.name = 'COMPLETED')",
 		from.Format("2006-01-02"), to.Format("2006-01-02"),
 	)
 	if err != nil {
